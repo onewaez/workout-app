@@ -3,269 +3,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout App</title>
+    <title>Workout Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --ios-blue: #007AFF;
-            --ios-bg: var(--tg-theme-secondary-bg-color, #efeff4);
+            --ios-bg: var(--tg-theme-secondary-bg-color, #f2f2f7);
             --ios-card: var(--tg-theme-bg-color, #ffffff);
             --ios-text: var(--tg-theme-text-color, #000000);
             --ios-hint: var(--tg-theme-hint-color, #8e8e93);
+            --ios-sep: rgba(0,0,0,0.1);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--ios-bg);
             color: var(--ios-text);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 80px; /* отступ для навигации */
-            -webkit-user-select: none;
+            margin: 0; padding: 0; overflow-x: hidden;
         }
 
-        /* Навигация (Таб-бар в стиле iOS) */
-        .tab-bar {
+        /* --- SIDEBAR --- */
+        #sidebar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 65px;
+            left: -250px;
+            top: 0;
+            width: 250px;
+            height: 100%;
             background: var(--ios-card);
-            border-top: 0.5px solid rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
+            z-index: 2000;
+            transition: 0.3s;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+            padding-top: 50px;
         }
-
-        .tab-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 10px;
-            color: var(--ios-hint);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .tab-item.active {
-            color: var(--ios-blue);
-        }
-
-        .tab-icon {
-            font-size: 24px;
-            margin-bottom: 2px;
-        }
-
-        /* Страницы */
-        .page {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 { font-size: 28px; font-weight: 700; margin-bottom: 20px; }
-
-        /* Карточки упражнений и групп */
-        .card {
-            background: var(--ios-card);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .muscle-btn {
-            background: var(--ios-card);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .muscle-btn:active { background: #e5e5ea; }
-
-        /* Формы */
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: var(--ios-bg);
-            color: var(--ios-text);
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        .btn-main {
-            background: var(--ios-blue);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: 600;
+        #sidebar.open { left: 0; }
+        .menu-item {
+            padding: 15px 20px;
             font-size: 17px;
-            margin-top: 10px;
+            border-bottom: 0.5px solid var(--ios-sep);
+            display: flex; align-items: center; gap: 10px;
         }
+        .menu-item:active { background: var(--ios-bg); }
 
-        canvas {
-            width: 100% !important;
-            height: 200px !important;
-            margin-top: 20px;
+        /* --- MAIN CONTENT --- */
+        header {
+            padding: 15px;
+            display: flex; align-items: center; gap: 15px;
+            background: var(--ios-card);
+            position: sticky; top: 0; z-index: 1000;
         }
+        .burger { font-size: 24px; cursor: pointer; }
+
+        .page { display: none; padding: 15px; }
+        .page.active { display: block; }
+
+        /* --- CALENDAR UI --- */
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            background: var(--ios-card);
+            border-radius: 12px; padding: 10px; margin-bottom: 15px;
+        }
+        .day {
+            text-align: center; padding: 10px 0; border-radius: 8px;
+            font-size: 14px; cursor: pointer;
+        }
+        .day.selected { background: var(--ios-blue); color: white; }
+        .day.has-data { border-bottom: 3px solid var(--ios-blue); }
+
+        /* --- CARDS & FORMS --- */
+        .card {
+            background: var(--ios-card); border-radius: 12px;
+            padding: 15px; margin-bottom: 15px;
+        }
+        .ios-input {
+            width: 100%; border: none; background: var(--ios-bg);
+            padding: 12px; border-radius: 10px; margin: 5px 0;
+            box-sizing: border-box; font-size: 16px; color: var(--ios-text);
+        }
+        .btn {
+            background: var(--ios-blue); color: white; border: none;
+            padding: 12px; border-radius: 10px; width: 100%; font-weight: 600;
+        }
+        .btn-red { background: #FF3B30; margin-top: 5px; }
+
+        /* --- WORKOUT LIST --- */
+        .ex-item { border-bottom: 0.5px solid var(--ios-sep); padding: 10px 0; }
+        .set-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--ios-bg); margin: 5px 0; padding: 8px; border-radius: 8px;
+        }
+        .done-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ios-blue); }
+        .done-check.checked { background: var(--ios-blue); }
     </style>
 </head>
 <body>
 
-    <div id="exercises" class="page active">
-        <h1>Мышцы</h1>
-        <div class="grid">
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Грудь')">Грудь</div>
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Плечи')">Плечи</div>
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Бицепс')">Бицепс</div>
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Трицепс')">Трицепс</div>
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Спина')">Спина</div>
-            <div class="muscle-btn" onclick="tg.showAlert('Выбрано: Ноги')">Ноги</div>
-        </div>
+    <div id="sidebar">
+        <div class="menu-item" onclick="nav('plan')">📅 План тренировки</div>
+        <div class="menu-item" onclick="nav('stats')">📈 Статистика</div>
+        <div class="menu-item" onclick="nav('random')">🎲 Рандомайзер</div>
     </div>
 
-    <div id="calendar" class="page">
-        <h1>План</h1>
-        <div class="card">
-            <h3>Добавить тренировку</h3>
-            <select id="workout-muscle">
+    <header>
+        <span class="burger" onclick="toggleMenu()">☰</span>
+        <h2 id="header-title">План</h2>
+    </header>
+
+    <div id="plan" class="page active">
+        <div id="calendar" class="calendar-grid"></div>
+        <div id="day-detail" class="card">
+            <h3 id="selected-date-str">Выберите день</h3>
+            <div id="workout-content"></div>
+            <hr>
+            <h4>Добавить упражнение</h4>
+            <select id="muscle-select" class="ios-input">
                 <option value="Грудь">Грудь</option>
+                <option value="Плечи">Плечи</option>
+                <option value="Бицепс">Бицепс</option>
+                <option value="Трицепс">Трицепс</option>
+                <option value="Трапеция">Трапеция</option>
                 <option value="Спина">Спина</option>
                 <option value="Ноги">Ноги</option>
             </select>
-            <textarea id="workout-desc" placeholder="Описание (упражнения, подходы...)"></textarea>
-            <button class="btn-main" onclick="saveWorkout()">Сохранить в план</button>
+            <input type="text" id="ex-name" class="ios-input" placeholder="Название упражнения">
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="sets-count" class="ios-input" placeholder="Подходы">
+                <input type="number" id="reps-count" class="ios-input" placeholder="Повторы">
+            </div>
+            <button class="btn" onclick="addExercise()">Добавить</button>
         </div>
-        <div id="workout-list"></div>
     </div>
 
     <div id="stats" class="page">
-        <h1>Статистика</h1>
         <div class="card">
-            <h3>Ваш вес (кг)</h3>
-            <input type="number" id="weight-input" placeholder="Например: 75.5">
-            <button class="btn-main" onclick="addWeight()">Добавить замер</button>
+            <h3>Замер веса</h3>
+            <input type="date" id="weight-date" class="ios-input">
+            <input type="number" id="weight-val" class="ios-input" placeholder="Вес в кг">
+            <button class="btn" onclick="saveWeight()">Сохранить вес</button>
         </div>
         <div class="card">
             <canvas id="weightChart"></canvas>
+            <div id="weight-history" style="margin-top:15px;"></div>
         </div>
     </div>
 
-    <nav class="tab-bar">
-        <div class="tab-item active" onclick="showPage('exercises', this)">
-            <span class="tab-icon">💪</span>
-            <span>Мышцы</span>
-        </div>
-        <div class="tab-item" onclick="showPage('calendar', this)">
-            <span class="tab-icon">📅</span>
-            <span>План</span>
-        </div>
-        <div class="tab-item" onclick="showPage('stats', this)">
-            <span class="tab-icon">📈</span>
-            <span>Статистика</span>
-        </div>
-    </nav>
+    <div id="random" class="page">
+        <div class="card"><h3>Скоро здесь будет рандомайзер!</h3></div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Переключение страниц
-        function showPage(pageId, element) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById(pageId).classList.add('active');
-            element.classList.add('active');
-            
-            if(pageId === 'stats') { updateChart(); }
-        }
+        let state = {
+            view: 'plan',
+            selectedDate: new Date().toISOString().split('T')[0],
+            workouts: {}, // { '2023-10-25': [ {muscle, name, sets: [{reps, done}] } ] }
+            weights: []    // [ {date, val} ]
+        };
 
-        // --- ЛОГИКА ДАННЫХ (CloudStorage) ---
-
-        let weightData = [];
-
-        // Загрузка данных при старте
-        tg.CloudStorage.getItem('weights', (err, value) => {
-            if(!err && value) {
-                weightData = JSON.parse(value);
-                if(document.getElementById('stats').classList.contains('active')) updateChart();
+        // Загрузка данных
+        tg.CloudStorage.getItems(['workouts', 'weights'], (err, values) => {
+            if(!err) {
+                if(values.workouts) state.workouts = JSON.parse(values.workouts);
+                if(values.weights) state.weights = JSON.parse(values.weights);
+                renderAll();
             }
         });
 
-        function addWeight() {
-            const val = document.getElementById('weight-input').value;
-            if(!val) return;
+        function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
 
-            const entry = { date: new Date().toLocaleDateString(), weight: parseFloat(val) };
-            weightData.push(entry);
-            
-            // Сохраняем в облако Telegram
-            tg.CloudStorage.setItem('weights', JSON.stringify(weightData));
-            
-            document.getElementById('weight-input').value = '';
-            updateChart();
-            tg.HapticFeedback.notificationOccurred('success');
+        function nav(v) {
+            state.view = v;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(v).classList.add('active');
+            document.getElementById('header-title').innerText = v === 'plan' ? 'План' : (v === 'stats' ? 'Статистика' : 'Рандомайзер');
+            toggleMenu();
+            if(v === 'stats') renderStats();
+            renderAll();
         }
 
-        // График
-        let chart;
-        function updateChart() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            if(chart) chart.destroy();
+        // --- CALENDAR LOGIC ---
+        function renderCalendar() {
+            const container = document.getElementById('calendar');
+            container.innerHTML = '';
+            const now = new Date();
+            for(let i = -3; i < 4; i++) {
+                const d = new Date();
+                d.setDate(now.getDate() + i);
+                const iso = d.toISOString().split('T')[0];
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day ${iso === state.selectedDate ? 'selected' : ''} ${state.workouts[iso] ? 'has-data' : ''}`;
+                dayDiv.innerHTML = `<div>${d.toLocaleDateString('ru', {weekday: 'short'})}</div><b>${d.getDate()}</b>`;
+                dayDiv.onclick = () => { state.selectedDate = iso; renderAll(); };
+                container.appendChild(dayDiv);
+            }
+            document.getElementById('selected-date-str').innerText = state.selectedDate;
+        }
 
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weightData.map(d => d.date),
-                    datasets: [{
-                        label: 'Вес',
-                        data: weightData.map(d => d.weight),
-                        borderColor: '#007AFF',
-                        tension: 0.4,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
+        // --- WORKOUT LOGIC ---
+        function addExercise() {
+            const muscle = document.getElementById('muscle-select').value;
+            const name = document.getElementById('ex-name').value;
+            const setsNum = parseInt(document.getElementById('sets-count').value);
+            const repsNum = document.getElementById('reps-count').value;
+
+            if(!name || !setsNum) return;
+
+            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
+            
+            const sets = [];
+            for(let i=0; i<setsNum; i++) sets.push({reps: repsNum, done: false});
+
+            state.workouts[state.selectedDate].push({ muscle, name, sets });
+            save();
+            renderAll();
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function deleteEx(idx) {
+            state.workouts[state.selectedDate].splice(idx, 1);
+            if(state.workouts[state.selectedDate].length === 0) delete state.workouts[state.selectedDate];
+            save();
+            renderAll();
+        }
+
+        function toggleSet(exIdx, setIdx) {
+            state.workouts[state.selectedDate][exIdx].sets[setIdx].done = !state.workouts[state.selectedDate][exIdx].sets[setIdx].done;
+            save();
+            renderAll();
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        function renderWorkout() {
+            const cont = document.getElementById('workout-content');
+            cont.innerHTML = '';
+            const list = state.workouts[state.selectedDate] || [];
+            list.forEach((ex, exIdx) => {
+                const div = document.createElement('div');
+                div.className = 'ex-item';
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <b>${ex.muscle}: ${ex.name}</b>
+                        <span onclick="deleteEx(${exIdx})" style="color:red">✕</span>
+                    </div>
+                    ${ex.sets.map((s, sIdx) => `
+                        <div class="set-row" onclick="toggleSet(${exIdx}, ${sIdx})">
+                            <span>Сет ${sIdx+1}: ${s.reps} повт.</span>
+                            <div class="done-check ${s.done ? 'checked' : ''}"></div>
+                        </div>
+                    `).join('')}
+                `;
+                cont.appendChild(div);
             });
         }
 
-        function saveWorkout() {
-            const muscle = document.getElementById('workout-muscle').value;
-            const desc = document.getElementById('workout-desc').value;
-            tg.showAlert(`План на ${muscle} сохранен!\n${desc}`);
-            tg.HapticFeedback.impactOccurred('medium');
+        // --- STATS LOGIC ---
+        function saveWeight() {
+            const date = document.getElementById('weight-date').value;
+            const val = parseFloat(document.getElementById('weight-val').value);
+            if(!date || !val) return;
+            state.weights.push({date, val});
+            state.weights.sort((a,b) => new Date(a.date) - new Date(b.date));
+            save();
+            renderStats();
         }
+
+        function deleteWeight(idx) {
+            state.weights.splice(idx, 1);
+            save();
+            renderStats();
+        }
+
+        let chart;
+        function renderStats() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: state.weights.map(w => w.date),
+                    datasets: [{ label: 'Вес', data: state.weights.map(w => w.val), borderColor: '#007AFF', tension: 0.3 }]
+                }
+            });
+
+            const hist = document.getElementById('weight-history');
+            hist.innerHTML = '<h4>История:</h4>';
+            state.weights.forEach((w, i) => {
+                hist.innerHTML += `<div class="set-row"><span>${w.date} — ${w.val} кг</span><span onclick="deleteWeight(${i})" style="color:red">✕</span></div>`;
+            });
+        }
+
+        function save() {
+            tg.CloudStorage.setItem('workouts', JSON.stringify(state.workouts));
+            tg.CloudStorage.setItem('weights', JSON.stringify(state.weights));
+        }
+
+        function renderAll() {
+            renderCalendar();
+            renderWorkout();
+        }
+
+        renderAll();
     </script>
 </body>
 </html>
