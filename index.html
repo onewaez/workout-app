@@ -3,308 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout Pro</title>
+    <title>Workout Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-bg: var(--tg-theme-secondary-bg-color, #f2f2f7);
-            --ios-card: var(--tg-theme-bg-color, #ffffff);
-            --ios-text: var(--tg-theme-text-color, #000000);
-            --ios-hint: var(--tg-theme-hint-color, #8e8e93);
-            --ios-sep: rgba(0,0,0,0.1);
+            --ios-blue: #007AFF; --ios-bg: var(--tg-theme-secondary-bg-color, #f2f2f7);
+            --ios-card: var(--tg-theme-bg-color, #ffffff); --ios-text: var(--tg-theme-text-color, #000000);
+            --ios-hint: var(--tg-theme-hint-color, #8e8e93); --ios-sep: rgba(0,0,0,0.1);
         }
-
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--ios-bg);
-            color: var(--ios-text);
-            margin: 0; padding: 0; overflow-x: hidden;
-        }
-
-        /* --- SIDEBAR --- */
-        #sidebar {
-            position: fixed;
-            left: -250px;
-            top: 0;
-            width: 250px;
-            height: 100%;
-            background: var(--ios-card);
-            z-index: 2000;
-            transition: 0.3s;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
-            padding-top: 50px;
-        }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: 50px; }
+        
+        /* Стили Меню */
+        #sidebar { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: var(--ios-card); z-index: 2000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding-top: 50px; }
         #sidebar.open { left: 0; }
-        .menu-item {
-            padding: 15px 20px;
-            font-size: 17px;
-            border-bottom: 0.5px solid var(--ios-sep);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .menu-item:active { background: var(--ios-bg); }
+        .menu-item { padding: 15px 20px; border-bottom: 0.5px solid var(--ios-sep); display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
-        /* --- MAIN CONTENT --- */
-        header {
-            padding: 15px;
-            display: flex; align-items: center; gap: 15px;
-            background: var(--ios-card);
-            position: sticky; top: 0; z-index: 1000;
-        }
-        .burger { font-size: 24px; cursor: pointer; }
-
-        .page { display: none; padding: 15px; }
+        header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--ios-card); position: sticky; top: 0; z-index: 1000; border-bottom: 0.5px solid var(--ios-sep); }
+        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- CALENDAR UI --- */
-        .calendar-grid {
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            background: var(--ios-card);
-            border-radius: 12px; padding: 10px; margin-bottom: 15px;
-        }
-        .day {
-            text-align: center; padding: 10px 0; border-radius: 8px;
-            font-size: 14px; cursor: pointer;
-        }
-        .day.selected { background: var(--ios-blue); color: white; }
-        .day.has-data { border-bottom: 3px solid var(--ios-blue); }
+        /* Календарь Месяц */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--ios-card); border-radius: 12px; padding: 10px; }
+        .cal-day { text-align: center; padding: 10px 0; font-size: 14px; border-radius: 8px; cursor: pointer; position: relative; }
+        .cal-day.today { color: var(--ios-blue); font-weight: bold; }
+        .cal-day.selected { background: var(--ios-blue); color: white !important; }
+        .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--ios-blue); border-radius: 50%; }
 
-        /* --- CARDS & FORMS --- */
-        .card {
-            background: var(--ios-card); border-radius: 12px;
-            padding: 15px; margin-bottom: 15px;
-        }
-        .ios-input {
-            width: 100%; border: none; background: var(--ios-bg);
-            padding: 12px; border-radius: 10px; margin: 5px 0;
-            box-sizing: border-box; font-size: 16px; color: var(--ios-text);
-        }
-        .btn {
-            background: var(--ios-blue); color: white; border: none;
-            padding: 12px; border-radius: 10px; width: 100%; font-weight: 600;
-        }
-        .btn-red { background: #FF3B30; margin-top: 5px; }
+        /* Карточки и Инпуты */
+        .card { background: var(--ios-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .ios-input { width: 100%; border: none; background: var(--ios-bg); padding: 12px; border-radius: 10px; margin: 5px 0; box-sizing: border-box; font-size: 16px; color: var(--ios-text); }
+        .btn { background: var(--ios-blue); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; cursor: pointer; }
+        .btn-outline { background: none; border: 1px solid var(--ios-blue); color: var(--ios-blue); }
+        
+        /* Сеты */
+        .set-edit-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; margin-top: 5px; }
+        .ex-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; padding: 10px 0; }
+        .set-row { display: flex; justify-content: space-between; align-items: center; background: var(--ios-bg); padding: 10px; border-radius: 10px; margin-bottom: 5px; }
+        .check-box { width: 22px; height: 22px; border: 2px solid var(--ios-blue); border-radius: 6px; }
+        .check-box.done { background: var(--ios-blue); }
 
-        /* --- WORKOUT LIST --- */
-        .ex-item { border-bottom: 0.5px solid var(--ios-sep); padding: 10px 0; }
-        .set-row {
-            display: flex; align-items: center; justify-content: space-between;
-            background: var(--ios-bg); margin: 5px 0; padding: 8px; border-radius: 8px;
-        }
-        .done-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ios-blue); }
-        .done-check.checked { background: var(--ios-blue); }
+        /* Прогресс-бар */
+        .progress-container { background: var(--ios-bg); height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { background: var(--ios-blue); height: 100%; transition: 0.5s; }
+
+        /* Колесо */
+        #wheel-container { position: relative; width: 200px; height: 200px; margin: 20px auto; border-radius: 50%; border: 5px solid var(--ios-card); transition: 3s cubic-bezier(0.1, 0, 0.2, 1); overflow: hidden; }
+        .wheel-arrow { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 24px; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <div class="menu-item" onclick="nav('plan')">📅 План тренировки</div>
+        <div class="menu-item" onclick="nav('plan')">📅 План тренировок</div>
+        <div class="menu-item" onclick="nav('presets')">📋 Мои Пресеты</div>
         <div class="menu-item" onclick="nav('stats')">📈 Статистика</div>
-        <div class="menu-item" onclick="nav('random')">🎲 Рандомайзер</div>
+        <div class="menu-item" onclick="nav('random')">🎡 Рандомайзер</div>
     </div>
 
     <header>
-        <span class="burger" onclick="toggleMenu()">☰</span>
+        <span onclick="toggleMenu()">☰</span>
         <h2 id="header-title">План</h2>
     </header>
 
     <div id="plan" class="page active">
-        <div id="calendar" class="calendar-grid"></div>
-        <div id="day-detail" class="card">
-            <h3 id="selected-date-str">Выберите день</h3>
-            <div id="workout-content"></div>
-            <hr>
-            <h4>Добавить упражнение</h4>
-            <select id="muscle-select" class="ios-input">
-                <option value="Грудь">Грудь</option>
-                <option value="Плечи">Плечи</option>
-                <option value="Бицепс">Бицепс</option>
-                <option value="Трицепс">Трицепс</option>
-                <option value="Трапеция">Трапеция</option>
-                <option value="Спина">Спина</option>
-                <option value="Ноги">Ноги</option>
-            </select>
-            <input type="text" id="ex-name" class="ios-input" placeholder="Название упражнения">
-            <div style="display: flex; gap: 5px;">
-                <input type="number" id="sets-count" class="ios-input" placeholder="Подходы">
-                <input type="number" id="reps-count" class="ios-input" placeholder="Повторы">
+        <div class="card">
+            <div class="cal-header">
+                <button class="btn btn-outline" style="width:40px" onclick="changeMonth(-1)">‹</button>
+                <b id="month-label">Октябрь 2023</b>
+                <button class="btn btn-outline" style="width:40px" onclick="changeMonth(1)">›</button>
             </div>
-            <button class="btn" onclick="addExercise()">Добавить</button>
+            <div id="calendar" class="cal-grid"></div>
         </div>
+        
+        <div id="day-detail" class="card">
+            <h3 id="selected-date-label">Выберите день</h3>
+            <div id="workout-list"></div>
+            <button class="btn btn-outline" onclick="showModal('ex')">+ Добавить упражнение</button>
+            <button class="btn btn-outline" style="margin-top:10px" onclick="applyPreset()">🧩 Применить пресет</button>
+        </div>
+    </div>
+
+    <div id="presets" class="page">
+        <div class="card">
+            <h3>Новый пресет</h3>
+            <input type="text" id="preset-name" class="ios-input" placeholder="Название (например: Ноги-День)">
+            <button class="btn" onclick="createPreset()">Создать пустой пресет</button>
+        </div>
+        <div id="presets-list"></div>
     </div>
 
     <div id="stats" class="page">
         <div class="card">
-            <h3>Замер веса</h3>
-            <input type="date" id="weight-date" class="ios-input">
-            <input type="number" id="weight-val" class="ios-input" placeholder="Вес в кг">
-            <button class="btn" onclick="saveWeight()">Сохранить вес</button>
+            <h3>Цель по весу</h3>
+            <div style="display:flex; gap:10px">
+                <input type="number" id="weight-goal" class="ios-input" placeholder="Ваша цель (кг)">
+                <button class="btn" style="width:100px" onclick="saveGoal()">OK</button>
+            </div>
+            <div class="progress-container"><div id="goal-progress" class="progress-fill"></div></div>
+            <p id="goal-text" style="font-size:12px; text-align:center"></p>
         </div>
-        <div class="card">
-            <canvas id="weightChart"></canvas>
-            <div id="weight-history" style="margin-top:15px;"></div>
-        </div>
+        <div class="card"><canvas id="weightChart"></canvas></div>
     </div>
 
     <div id="random" class="page">
-        <div class="card"><h3>Скоро здесь будет рандомайзер!</h3></div>
+        <div class="card">
+            <select id="wheel-muscle" class="ios-input" onchange="updateWheelList()">
+                <option value="Грудь">Грудь</option><option value="Спина">Спина</option><option value="Ноги">Ноги</option>
+            </select>
+            <div id="wheel-container">🎡</div>
+            <button class="btn" onclick="spinWheel()">Крутить!</button>
+        </div>
+        <div class="card">
+            <h4>База упражнений</h4>
+            <input type="text" id="new-ex-lib" class="ios-input" placeholder="Название упражнения">
+            <button class="btn btn-outline" onclick="addToLib()">Добавить в список</button>
+            <div id="lib-list" style="margin-top:10px"></div>
+        </div>
+    </div>
+
+    <div id="ex-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; padding:20px; box-sizing:border-box">
+        <div class="card" style="margin-top:50px">
+            <h3>Настройка упражнения</h3>
+            <select id="modal-muscle" class="ios-input">
+                <option value="Грудь">Грудь</option><option value="Спина">Спина</option><option value="Ноги">Ноги</option>
+            </select>
+            <input type="text" id="modal-ex-name" class="ios-input" placeholder="Название упражнения">
+            <div id="sets-editor"></div>
+            <button class="btn btn-outline" onclick="addSetToEditor()">+ Добавить подход</button>
+            <button class="btn" style="margin-top:10px" onclick="saveEx()">Сохранить</button>
+            <button class="btn btn-outline" style="margin-top:5px; color:red; border-color:red" onclick="closeModal()">Отмена</button>
+        </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
+        const tg = window.Telegram.WebApp; tg.expand();
         let state = {
             view: 'plan',
+            curMonth: new Date(),
             selectedDate: new Date().toISOString().split('T')[0],
-            workouts: {}, // { '2023-10-25': [ {muscle, name, sets: [{reps, done}] } ] }
-            weights: []    // [ {date, val} ]
+            workouts: {}, presets: [], weights: [], goal: 0,
+            library: { "Грудь": ["Жим лежа"], "Спина": ["Тяга блока"], "Ноги": ["Приседания"] }
         };
 
-        // Загрузка данных
-        tg.CloudStorage.getItems(['workouts', 'weights'], (err, values) => {
-            if(!err) {
-                if(values.workouts) state.workouts = JSON.parse(values.workouts);
-                if(values.weights) state.weights = JSON.parse(values.weights);
-                renderAll();
-            }
+        // Инициализация
+        tg.CloudStorage.getItems(['data'], (err, val) => {
+            if(!err && val.data) { state = {...state, ...JSON.parse(val.data)}; state.curMonth = new Date(); }
+            renderAll();
         });
 
+        function save() { tg.CloudStorage.setItem('data', JSON.stringify(state)); }
+
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+        function nav(v) { state.view = v; document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(v).classList.add('active'); toggleMenu(); renderAll(); }
 
-        function nav(v) {
-            state.view = v;
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(v).classList.add('active');
-            document.getElementById('header-title').innerText = v === 'plan' ? 'План' : (v === 'stats' ? 'Статистика' : 'Рандомайзер');
-            toggleMenu();
-            if(v === 'stats') renderStats();
-            renderAll();
-        }
-
-        // --- CALENDAR LOGIC ---
+        // --- КАЛЕНДАРЬ ---
         function renderCalendar() {
-            const container = document.getElementById('calendar');
-            container.innerHTML = '';
-            const now = new Date();
-            for(let i = -3; i < 4; i++) {
-                const d = new Date();
-                d.setDate(now.getDate() + i);
-                const iso = d.toISOString().split('T')[0];
-                const dayDiv = document.createElement('div');
-                dayDiv.className = `day ${iso === state.selectedDate ? 'selected' : ''} ${state.workouts[iso] ? 'has-data' : ''}`;
-                dayDiv.innerHTML = `<div>${d.toLocaleDateString('ru', {weekday: 'short'})}</div><b>${d.getDate()}</b>`;
-                dayDiv.onclick = () => { state.selectedDate = iso; renderAll(); };
-                container.appendChild(dayDiv);
-            }
-            document.getElementById('selected-date-str').innerText = state.selectedDate;
-        }
-
-        // --- WORKOUT LOGIC ---
-        function addExercise() {
-            const muscle = document.getElementById('muscle-select').value;
-            const name = document.getElementById('ex-name').value;
-            const setsNum = parseInt(document.getElementById('sets-count').value);
-            const repsNum = document.getElementById('reps-count').value;
-
-            if(!name || !setsNum) return;
-
-            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
+            const grid = document.getElementById('calendar'); grid.innerHTML = '';
+            const m = state.curMonth.getMonth(), y = state.curMonth.getFullYear();
+            document.getElementById('month-label').innerText = new Intl.DateTimeFormat('ru', {month:'long', year:'numeric'}).format(state.curMonth);
             
-            const sets = [];
-            for(let i=0; i<setsNum; i++) sets.push({reps: repsNum, done: false});
+            let firstDay = new Date(y, m, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let daysInMonth = new Date(y, m + 1, 0).getDate();
 
-            state.workouts[state.selectedDate].push({ muscle, name, sets });
-            save();
-            renderAll();
-            tg.HapticFeedback.impactOccurred('medium');
+            for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateIso = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const el = document.createElement('div');
+                el.className = `cal-day ${dateIso === state.selectedDate ? 'selected' : ''}`;
+                el.innerText = d;
+                if(state.workouts[dateIso]) el.innerHTML += '<div class="dot"></div>';
+                el.onclick = () => { state.selectedDate = dateIso; renderAll(); };
+                grid.appendChild(el);
+            }
+            document.getElementById('selected-date-label').innerText = state.selectedDate;
         }
 
-        function deleteEx(idx) {
-            state.workouts[state.selectedDate].splice(idx, 1);
-            if(state.workouts[state.selectedDate].length === 0) delete state.workouts[state.selectedDate];
-            save();
-            renderAll();
+        function changeMonth(dir) { state.curMonth.setMonth(state.curMonth.getMonth() + dir); renderCalendar(); }
+
+        // --- УПРАЖНЕНИЯ ---
+        let tempSets = [];
+        function showModal(type) { document.getElementById('ex-modal').style.display = 'block'; tempSets = [{reps:10, weight:20}]; renderSetsEditor(); }
+        function closeModal() { document.getElementById('ex-modal').style.display = 'none'; }
+        
+        function renderSetsEditor() {
+            const cont = document.getElementById('sets-editor'); cont.innerHTML = '';
+            tempSets.forEach((s, i) => {
+                cont.innerHTML += `<div class="set-edit-row">
+                    <input type="number" class="ios-input" value="${s.weight}" onchange="tempSets[${i}].weight=this.value" placeholder="кг">
+                    <input type="number" class="ios-input" value="${s.reps}" onchange="tempSets[${i}].reps=this.value" placeholder="повт">
+                    <button class="btn btn-outline" style="color:red; border:none" onclick="tempSets.splice(${i},1); renderSetsEditor()">✕</button>
+                </div>`;
+            });
+        }
+        function addSetToEditor() { tempSets.push({reps:10, weight:20}); renderSetsEditor(); }
+
+        function saveEx() {
+            const ex = { 
+                muscle: document.getElementById('modal-muscle').value, 
+                name: document.getElementById('modal-ex-name').value, 
+                sets: tempSets.map(s => ({...s, done: false})) 
+            };
+            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
+            state.workouts[state.selectedDate].push(ex);
+            save(); renderAll(); closeModal();
         }
 
-        function toggleSet(exIdx, setIdx) {
-            state.workouts[state.selectedDate][exIdx].sets[setIdx].done = !state.workouts[state.selectedDate][exIdx].sets[setIdx].done;
-            save();
-            renderAll();
-            tg.HapticFeedback.selectionChanged();
-        }
-
-        function renderWorkout() {
-            const cont = document.getElementById('workout-content');
-            cont.innerHTML = '';
+        function renderWorkouts() {
+            const cont = document.getElementById('workout-list'); cont.innerHTML = '';
             const list = state.workouts[state.selectedDate] || [];
             list.forEach((ex, exIdx) => {
-                const div = document.createElement('div');
-                div.className = 'ex-item';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
-                        <b>${ex.muscle}: ${ex.name}</b>
-                        <span onclick="deleteEx(${exIdx})" style="color:red">✕</span>
-                    </div>
-                    ${ex.sets.map((s, sIdx) => `
-                        <div class="set-row" onclick="toggleSet(${exIdx}, ${sIdx})">
-                            <span>Сет ${sIdx+1}: ${s.reps} повт.</span>
-                            <div class="done-check ${s.done ? 'checked' : ''}"></div>
-                        </div>
-                    `).join('')}
-                `;
-                cont.appendChild(div);
+                const d = document.createElement('div'); d.className = 'card';
+                d.innerHTML = `<div class="ex-header"><span>${ex.muscle}: ${ex.name}</span><span onclick="state.workouts['${state.selectedDate}'].splice(${exIdx},1); save(); renderAll()">🗑️</span></div>`;
+                ex.sets.forEach((s, sIdx) => {
+                    d.innerHTML += `<div class="set-row" onclick="toggleSet('${state.selectedDate}', ${exIdx}, ${sIdx})">
+                        <span>Сет ${sIdx+1}: ${s.weight}кг x ${s.reps}</span>
+                        <div class="check-box ${s.done ? 'done' : ''}"></div>
+                    </div>`;
+                });
+                cont.appendChild(d);
             });
         }
+        function toggleSet(date, exIdx, sIdx) { state.workouts[date][exIdx].sets[sIdx].done = !state.workouts[date][exIdx].sets[sIdx].done; save(); renderAll(); }
 
-        // --- STATS LOGIC ---
-        function saveWeight() {
-            const date = document.getElementById('weight-date').value;
-            const val = parseFloat(document.getElementById('weight-val').value);
-            if(!date || !val) return;
-            state.weights.push({date, val});
-            state.weights.sort((a,b) => new Date(a.date) - new Date(b.date));
-            save();
-            renderStats();
+        // --- ПРЕСЕТЫ ---
+        function createPreset() {
+            const name = document.getElementById('preset-name').value;
+            if(!name) return;
+            state.presets.push({ name, exercises: [] });
+            save(); renderAll();
         }
 
-        function deleteWeight(idx) {
-            state.weights.splice(idx, 1);
-            save();
-            renderStats();
+        function applyPreset() {
+            if(state.presets.length === 0) return tg.showAlert("Сначала создайте пресет во вкладке Пресеты");
+            const p = state.presets[0]; // Для примера берем первый
+            state.workouts[state.selectedDate] = JSON.parse(JSON.stringify(p.exercises));
+            save(); renderAll();
         }
 
-        let chart;
+        // --- СТАТИСТИКА ---
+        function saveGoal() { state.goal = parseFloat(document.getElementById('weight-goal').value); save(); renderAll(); }
         function renderStats() {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: state.weights.map(w => w.date),
-                    datasets: [{ label: 'Вес', data: state.weights.map(w => w.val), borderColor: '#007AFF', tension: 0.3 }]
-                }
-            });
-
-            const hist = document.getElementById('weight-history');
-            hist.innerHTML = '<h4>История:</h4>';
-            state.weights.forEach((w, i) => {
-                hist.innerHTML += `<div class="set-row"><span>${w.date} — ${w.val} кг</span><span onclick="deleteWeight(${i})" style="color:red">✕</span></div>`;
-            });
+            if(!state.goal) return;
+            const lastWeight = state.weights.length ? state.weights[state.weights.length-1].val : 0;
+            const progress = Math.min(100, Math.max(0, (lastWeight / state.goal) * 100));
+            document.getElementById('goal-progress').style.width = progress + '%';
+            document.getElementById('goal-text').innerText = `Текущий вес: ${lastWeight}кг / Цель: ${state.goal}кг`;
         }
 
-        function save() {
-            tg.CloudStorage.setItem('workouts', JSON.stringify(state.workouts));
-            tg.CloudStorage.setItem('weights', JSON.stringify(state.weights));
+        // --- РАНДОМАЙЗЕР ---
+        function updateWheelList() {
+            const m = document.getElementById('wheel-muscle').value;
+            const list = state.library[m] || [];
+            document.getElementById('lib-list').innerHTML = list.map((ex, i) => `<div>${ex} <span onclick="state.library['${m}'].splice(${i},1); save(); updateWheelList()">✕</span></div>`).join('');
+        }
+        function addToLib() {
+            const m = document.getElementById('wheel-muscle').value;
+            const name = document.getElementById('new-ex-lib').value;
+            if(!state.library[m]) state.library[m] = [];
+            state.library[m].push(name); save(); updateWheelList();
+        }
+        function spinWheel() {
+            const m = document.getElementById('wheel-muscle').value;
+            const items = state.library[m];
+            if(!items || items.length === 0) return tg.showAlert("Список пуст");
+            const res = items[Math.floor(Math.random() * items.length)];
+            tg.showAlert("Выпало упражнение: " + res);
         }
 
         function renderAll() {
-            renderCalendar();
-            renderWorkout();
+            renderCalendar(); renderWorkouts(); renderStats(); updateWheelList();
         }
-
-        renderAll();
     </script>
 </body>
 </html>
