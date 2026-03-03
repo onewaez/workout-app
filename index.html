@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout Ultimate</title>
+    <title>Workout Ultimate iOS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,44 +14,46 @@
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--ios-bg); color: var(--ios-text); margin: 0; padding-bottom: 50px; }
         
-        /* Стили Меню */
+        /* Меню */
         #sidebar { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: var(--ios-card); z-index: 2000; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.1); padding-top: 50px; }
         #sidebar.open { left: 0; }
-        .menu-item { padding: 15px 20px; border-bottom: 0.5px solid var(--ios-sep); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .menu-item { padding: 15px 20px; border-bottom: 0.5px solid var(--ios-sep); display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 17px; }
 
         header { padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--ios-card); position: sticky; top: 0; z-index: 1000; border-bottom: 0.5px solid var(--ios-sep); }
         .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Календарь Месяц */
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--ios-card); border-radius: 12px; padding: 10px; }
+        /* Базовые элементы */
+        .card { background: var(--ios-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .ios-input { width: 100%; border: none; background: var(--ios-bg); padding: 12px; border-radius: 10px; margin: 5px 0; box-sizing: border-box; font-size: 16px; color: var(--ios-text); }
+        .btn { background: var(--ios-blue); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; cursor: pointer; font-size: 16px; margin-top: 5px; }
+        .btn-outline { background: none; border: 1px solid var(--ios-blue); color: var(--ios-blue); }
+        .btn-red { background: #FF3B30; color: white; }
+
+        /* Календарь */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--ios-card); border-radius: 12px; padding: 10px; gap: 2px;}
         .cal-day { text-align: center; padding: 10px 0; font-size: 14px; border-radius: 8px; cursor: pointer; position: relative; }
-        .cal-day.today { color: var(--ios-blue); font-weight: bold; }
         .cal-day.selected { background: var(--ios-blue); color: white !important; }
         .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--ios-blue); border-radius: 50%; }
+        .cal-day.selected .dot { background: white; }
 
-        /* Карточки и Инпуты */
-        .card { background: var(--ios-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-        .ios-input { width: 100%; border: none; background: var(--ios-bg); padding: 12px; border-radius: 10px; margin: 5px 0; box-sizing: border-box; font-size: 16px; color: var(--ios-text); }
-        .btn { background: var(--ios-blue); color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; cursor: pointer; }
-        .btn-outline { background: none; border: 1px solid var(--ios-blue); color: var(--ios-blue); }
-        
-        /* Сеты */
-        .set-edit-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; margin-top: 5px; }
-        .ex-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; padding: 10px 0; }
+        /* Списки и подходы */
+        .ex-header { display: flex; justify-content: space-between; font-weight: bold; padding-bottom: 5px; border-bottom: 1px solid var(--ios-sep); margin-bottom: 10px; }
         .set-row { display: flex; justify-content: space-between; align-items: center; background: var(--ios-bg); padding: 10px; border-radius: 10px; margin-bottom: 5px; }
+        .set-edit-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; margin-bottom: 5px; }
         .check-box { width: 22px; height: 22px; border: 2px solid var(--ios-blue); border-radius: 6px; }
         .check-box.done { background: var(--ios-blue); }
 
-        /* Прогресс-бар */
-        .progress-container { background: var(--ios-bg); height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
-        .progress-fill { background: var(--ios-blue); height: 100%; transition: 0.5s; }
-
         /* Колесо */
-        #wheel-container { position: relative; width: 200px; height: 200px; margin: 20px auto; border-radius: 50%; border: 5px solid var(--ios-card); transition: 3s cubic-bezier(0.1, 0, 0.2, 1); overflow: hidden; }
-        .wheel-arrow { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 10; font-size: 24px; }
+        .wheel-wrapper { position: relative; width: 250px; height: 250px; margin: 20px auto; }
+        .wheel-arrow { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 20px solid var(--ios-text); z-index: 10; }
+        #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Модалки */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background: var(--ios-card); padding: 20px; border-radius: 15px; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -64,102 +66,168 @@
     </div>
 
     <header>
-        <span onclick="toggleMenu()">☰</span>
-        <h2 id="header-title">План</h2>
+        <span onclick="toggleMenu()" style="font-size: 24px; cursor: pointer;">☰</span>
+        <h2 id="header-title" style="margin: 0;">План</h2>
     </header>
 
     <div id="plan" class="page active">
         <div class="card">
             <div class="cal-header">
-                <button class="btn btn-outline" style="width:40px" onclick="changeMonth(-1)">‹</button>
-                <b id="month-label">Октябрь 2023</b>
-                <button class="btn btn-outline" style="width:40px" onclick="changeMonth(1)">›</button>
+                <button class="btn btn-outline" style="width:40px; padding: 5px;" onclick="changeMonth(-1)">‹</button>
+                <span id="month-label"></span>
+                <button class="btn btn-outline" style="width:40px; padding: 5px;" onclick="changeMonth(1)">›</button>
             </div>
             <div id="calendar" class="cal-grid"></div>
         </div>
         
         <div id="day-detail" class="card">
-            <h3 id="selected-date-label">Выберите день</h3>
+            <h3 id="selected-date-label" style="margin-top:0">Выберите день</h3>
             <div id="workout-list"></div>
-            <button class="btn btn-outline" onclick="showModal('ex')">+ Добавить упражнение</button>
-            <button class="btn btn-outline" style="margin-top:10px" onclick="applyPreset()">🧩 Применить пресет</button>
+            <button class="btn btn-outline" onclick="openExModal('plan')">+ Добавить упражнение</button>
+            <button class="btn btn-outline" style="margin-top:10px" onclick="openApplyPresetModal()">🧩 Применить пресет</button>
         </div>
     </div>
 
     <div id="presets" class="page">
         <div class="card">
-            <h3>Новый пресет</h3>
-            <input type="text" id="preset-name" class="ios-input" placeholder="Название (например: Ноги-День)">
-            <button class="btn" onclick="createPreset()">Создать пустой пресет</button>
+            <h3 style="margin-top:0">Создать новый пресет</h3>
+            <input type="text" id="preset-name" class="ios-input" placeholder="Название (напр. 'Грудь + Трицепс')">
+            <button class="btn" onclick="createPreset()">Создать пресет</button>
         </div>
         <div id="presets-list"></div>
     </div>
 
     <div id="stats" class="page">
         <div class="card">
+            <h3 style="margin-top:0">Добавить замер</h3>
+            <input type="date" id="stat-date" class="ios-input">
+            <input type="number" id="stat-weight" class="ios-input" placeholder="Вес (кг)">
+            <button class="btn" onclick="addWeight()">Сохранить вес</button>
+        </div>
+        <div class="card">
             <h3>Цель по весу</h3>
             <div style="display:flex; gap:10px">
-                <input type="number" id="weight-goal" class="ios-input" placeholder="Ваша цель (кг)">
+                <input type="number" id="goal-weight" class="ios-input" placeholder="Цель (кг)">
                 <button class="btn" style="width:100px" onclick="saveGoal()">OK</button>
             </div>
-            <div class="progress-container"><div id="goal-progress" class="progress-fill"></div></div>
-            <p id="goal-text" style="font-size:12px; text-align:center"></p>
+            <div style="background: var(--ios-bg); height: 12px; border-radius: 6px; margin-top: 10px; overflow: hidden;">
+                <div id="goal-bar" style="background: var(--ios-blue); height: 100%; width: 0%; transition: 0.5s;"></div>
+            </div>
+            <p id="goal-text" style="font-size:13px; text-align:center; color: var(--ios-hint);"></p>
         </div>
-        <div class="card"><canvas id="weightChart"></canvas></div>
+        <div class="card">
+            <canvas id="weightChart"></canvas>
+        </div>
     </div>
 
     <div id="random" class="page">
         <div class="card">
-            <select id="wheel-muscle" class="ios-input" onchange="updateWheelList()">
-                <option value="Грудь">Грудь</option><option value="Спина">Спина</option><option value="Ноги">Ноги</option>
-            </select>
-            <div id="wheel-container">🎡</div>
-            <button class="btn" onclick="spinWheel()">Крутить!</button>
+            <h3 style="margin-top:0">Шокируем мышцы</h3>
+            <select id="wheel-muscle" class="ios-input" onchange="drawWheel()">
+                </select>
+            
+            <div class="wheel-wrapper">
+                <div class="wheel-arrow"></div>
+                <canvas id="wheelCanvas" width="250" height="250"></canvas>
+            </div>
+            <button class="btn" onclick="spinWheel()">Крутить колесо!</button>
         </div>
+        
         <div class="card">
-            <h4>База упражнений</h4>
-            <input type="text" id="new-ex-lib" class="ios-input" placeholder="Название упражнения">
-            <button class="btn btn-outline" onclick="addToLib()">Добавить в список</button>
-            <div id="lib-list" style="margin-top:10px"></div>
+            <h4>Добавить упражнение в колесо</h4>
+            <input type="text" id="new-wheel-ex" class="ios-input" placeholder="Название (напр. Жим гантелей)">
+            <button class="btn btn-outline" onclick="addExToWheel()">Добавить</button>
+            <div id="wheel-ex-list" style="margin-top:15px"></div>
         </div>
     </div>
 
-    <div id="ex-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; padding:20px; box-sizing:border-box">
-        <div class="card" style="margin-top:50px">
-            <h3>Настройка упражнения</h3>
-            <select id="modal-muscle" class="ios-input">
-                <option value="Грудь">Грудь</option><option value="Спина">Спина</option><option value="Ноги">Ноги</option>
-            </select>
-            <input type="text" id="modal-ex-name" class="ios-input" placeholder="Название упражнения">
+    <div id="ex-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Настройка упражнения</h3>
+            <select id="modal-muscle" class="ios-input"></select>
+            <input type="text" id="modal-ex-name" class="ios-input" placeholder="Название (напр. Жим лежа)">
+            <input type="text" id="modal-ex-desc" class="ios-input" placeholder="Описание (необязательно)">
+            
+            <h4 style="margin-bottom:5px">Подходы</h4>
             <div id="sets-editor"></div>
-            <button class="btn btn-outline" onclick="addSetToEditor()">+ Добавить подход</button>
-            <button class="btn" style="margin-top:10px" onclick="saveEx()">Сохранить</button>
-            <button class="btn btn-outline" style="margin-top:5px; color:red; border-color:red" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-outline" style="margin-bottom:15px" onclick="addSetToEditor()">+ Добавить подход</button>
+            
+            <button class="btn" onclick="saveExercise()">Сохранить упражнение</button>
+            <button class="btn btn-red" onclick="closeModal('ex-modal')">Отмена</button>
+        </div>
+    </div>
+
+    <div id="apply-preset-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Выберите пресет</h3>
+            <div id="preset-selection-list"></div>
+            <button class="btn btn-red" style="margin-top:15px" onclick="closeModal('apply-preset-modal')">Отмена</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
+        
+        const MUSCLES = ["Грудь", "Плечи", "Бицепс", "Трицепс", "Трапеция", "Спина", "Ноги"];
+        
         let state = {
-            view: 'plan',
             curMonth: new Date(),
             selectedDate: new Date().toISOString().split('T')[0],
-            workouts: {}, presets: [], weights: [], goal: 0,
-            library: { "Грудь": ["Жим лежа"], "Спина": ["Тяга блока"], "Ноги": ["Приседания"] }
+            workouts: {}, // { 'YYYY-MM-DD': [ {muscle, name, desc, sets: [{w, r, done}]} ] }
+            presets: [],  // [ {id, name, exercises: []} ]
+            weights: [],  // [ {date, val} ]
+            goal: 0,
+            wheelLib: {}  // { "Грудь": ["Жим", "Сведение"] }
         };
 
+        // Заполняем библиотеку колеса базовыми массивами
+        MUSCLES.forEach(m => { if(!state.wheelLib[m]) state.wheelLib[m] = []; });
+
+        let editContext = { type: null, targetId: null }; // type: 'plan' | 'preset'
+        let tempSets = [];
+        let chartInstance = null;
+        let currentRotation = 0;
+
         // Инициализация
-        tg.CloudStorage.getItems(['data'], (err, val) => {
-            if(!err && val.data) { state = {...state, ...JSON.parse(val.data)}; state.curMonth = new Date(); }
-            renderAll();
-        });
+        window.onload = () => {
+            document.getElementById('stat-date').value = state.selectedDate;
+            populateSelects();
+            
+            tg.CloudStorage.getItem('workoutData', (err, val) => {
+                if(!err && val) {
+                    const saved = JSON.parse(val);
+                    state.workouts = saved.workouts || {};
+                    state.presets = saved.presets || [];
+                    state.weights = saved.weights || [];
+                    state.goal = saved.goal || 0;
+                    if(saved.wheelLib) state.wheelLib = saved.wheelLib;
+                }
+                renderAll();
+            });
+        };
 
-        function save() { tg.CloudStorage.setItem('data', JSON.stringify(state)); }
+        function save() { tg.CloudStorage.setItem('workoutData', JSON.stringify(state)); }
 
+        // Навигация
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
-        function nav(v) { state.view = v; document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(v).classList.add('active'); toggleMenu(); renderAll(); }
+        function nav(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            const titles = { 'plan': 'План', 'presets': 'Мои Пресеты', 'stats': 'Статистика', 'random': 'Рандомайзер' };
+            document.getElementById('header-title').innerText = titles[pageId];
+            toggleMenu();
+            renderAll();
+        }
 
-        // --- КАЛЕНДАРЬ ---
+        function populateSelects() {
+            const selects = [document.getElementById('modal-muscle'), document.getElementById('wheel-muscle')];
+            selects.forEach(sel => {
+                sel.innerHTML = MUSCLES.map(m => `<option value="${m}">${m}</option>`).join('');
+            });
+        }
+
+        // ================= КАЛЕНДАРЬ И ПЛАН =================
         function renderCalendar() {
             const grid = document.getElementById('calendar'); grid.innerHTML = '';
             const m = state.curMonth.getMonth(), y = state.curMonth.getFullYear();
@@ -174,7 +242,8 @@
                 const el = document.createElement('div');
                 el.className = `cal-day ${dateIso === state.selectedDate ? 'selected' : ''}`;
                 el.innerText = d;
-                if(state.workouts[dateIso]) el.innerHTML += '<div class="dot"></div>';
+                if(state.workouts[dateIso] && state.workouts[dateIso].length > 0) el.innerHTML += '<div class="dot"></div>';
+                
                 el.onclick = () => { state.selectedDate = dateIso; renderAll(); };
                 grid.appendChild(el);
             }
@@ -183,98 +252,269 @@
 
         function changeMonth(dir) { state.curMonth.setMonth(state.curMonth.getMonth() + dir); renderCalendar(); }
 
-        // --- УПРАЖНЕНИЯ ---
-        let tempSets = [];
-        function showModal(type) { document.getElementById('ex-modal').style.display = 'block'; tempSets = [{reps:10, weight:20}]; renderSetsEditor(); }
-        function closeModal() { document.getElementById('ex-modal').style.display = 'none'; }
-        
-        function renderSetsEditor() {
-            const cont = document.getElementById('sets-editor'); cont.innerHTML = '';
-            tempSets.forEach((s, i) => {
-                cont.innerHTML += `<div class="set-edit-row">
-                    <input type="number" class="ios-input" value="${s.weight}" onchange="tempSets[${i}].weight=this.value" placeholder="кг">
-                    <input type="number" class="ios-input" value="${s.reps}" onchange="tempSets[${i}].reps=this.value" placeholder="повт">
-                    <button class="btn btn-outline" style="color:red; border:none" onclick="tempSets.splice(${i},1); renderSetsEditor()">✕</button>
-                </div>`;
-            });
-        }
-        function addSetToEditor() { tempSets.push({reps:10, weight:20}); renderSetsEditor(); }
-
-        function saveEx() {
-            const ex = { 
-                muscle: document.getElementById('modal-muscle').value, 
-                name: document.getElementById('modal-ex-name').value, 
-                sets: tempSets.map(s => ({...s, done: false})) 
-            };
-            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
-            state.workouts[state.selectedDate].push(ex);
-            save(); renderAll(); closeModal();
-        }
-
-        function renderWorkouts() {
+        function renderWorkoutPlan() {
             const cont = document.getElementById('workout-list'); cont.innerHTML = '';
             const list = state.workouts[state.selectedDate] || [];
+            
+            if(list.length === 0) cont.innerHTML = '<p style="color:var(--ios-hint); text-align:center;">Тренировок нет</p>';
+
             list.forEach((ex, exIdx) => {
                 const d = document.createElement('div'); d.className = 'card';
-                d.innerHTML = `<div class="ex-header"><span>${ex.muscle}: ${ex.name}</span><span onclick="state.workouts['${state.selectedDate}'].splice(${exIdx},1); save(); renderAll()">🗑️</span></div>`;
+                d.innerHTML = `
+                    <div class="ex-header">
+                        <div>
+                            <div style="font-size:16px;">${ex.muscle}: ${ex.name}</div>
+                            ${ex.desc ? `<div style="font-size:12px; color:var(--ios-hint); font-weight:normal;">${ex.desc}</div>` : ''}
+                        </div>
+                        <span style="color:red; cursor:pointer;" onclick="deleteExFromPlan(${exIdx})">✕</span>
+                    </div>
+                `;
                 ex.sets.forEach((s, sIdx) => {
-                    d.innerHTML += `<div class="set-row" onclick="toggleSet('${state.selectedDate}', ${exIdx}, ${sIdx})">
-                        <span>Сет ${sIdx+1}: ${s.weight}кг x ${s.reps}</span>
-                        <div class="check-box ${s.done ? 'done' : ''}"></div>
-                    </div>`;
+                    d.innerHTML += `
+                        <div class="set-row" onclick="togglePlanSet(${exIdx}, ${sIdx})">
+                            <span>Подход ${sIdx+1}: ${s.w} кг x ${s.r}</span>
+                            <div class="check-box ${s.done ? 'done' : ''}"></div>
+                        </div>`;
                 });
                 cont.appendChild(d);
             });
         }
-        function toggleSet(date, exIdx, sIdx) { state.workouts[date][exIdx].sets[sIdx].done = !state.workouts[date][exIdx].sets[sIdx].done; save(); renderAll(); }
 
-        // --- ПРЕСЕТЫ ---
+        function deleteExFromPlan(idx) { state.workouts[state.selectedDate].splice(idx,1); save(); renderWorkoutPlan(); renderCalendar(); }
+        function togglePlanSet(exIdx, sIdx) { 
+            state.workouts[state.selectedDate][exIdx].sets[sIdx].done = !state.workouts[state.selectedDate][exIdx].sets[sIdx].done; 
+            save(); renderWorkoutPlan(); tg.HapticFeedback.selectionChanged();
+        }
+
+        // ================= ПРЕСЕТЫ =================
         function createPreset() {
             const name = document.getElementById('preset-name').value;
             if(!name) return;
-            state.presets.push({ name, exercises: [] });
-            save(); renderAll();
+            state.presets.push({ id: Date.now(), name: name, exercises: [] });
+            document.getElementById('preset-name').value = '';
+            save(); renderPresets();
         }
 
-        function applyPreset() {
-            if(state.presets.length === 0) return tg.showAlert("Сначала создайте пресет во вкладке Пресеты");
-            const p = state.presets[0]; // Для примера берем первый
-            state.workouts[state.selectedDate] = JSON.parse(JSON.stringify(p.exercises));
-            save(); renderAll();
+        function renderPresets() {
+            const cont = document.getElementById('presets-list'); cont.innerHTML = '';
+            state.presets.forEach((p, pIdx) => {
+                const d = document.createElement('div'); d.className = 'card';
+                let html = `<div class="ex-header"><span>${p.name}</span> <span style="color:red; cursor:pointer;" onclick="deletePreset(${pIdx})">Удалить пресет</span></div>`;
+                
+                p.exercises.forEach((ex, exIdx) => {
+                    html += `<div style="padding: 5px 0; border-bottom: 0.5px solid var(--ios-sep); display:flex; justify-content:space-between;">
+                        <span>${ex.muscle}: ${ex.name} (${ex.sets.length} подх.)</span>
+                        <span style="color:red; cursor:pointer;" onclick="deleteExFromPreset(${pIdx}, ${exIdx})">✕</span>
+                    </div>`;
+                });
+                
+                html += `<button class="btn btn-outline" style="margin-top:10px;" onclick="openExModal('preset', ${p.id})">+ Добавить упражнение в пресет</button>`;
+                d.innerHTML = html;
+                cont.appendChild(d);
+            });
         }
 
-        // --- СТАТИСТИКА ---
-        function saveGoal() { state.goal = parseFloat(document.getElementById('weight-goal').value); save(); renderAll(); }
+        function deletePreset(idx) { state.presets.splice(idx,1); save(); renderPresets(); }
+        function deleteExFromPreset(pIdx, exIdx) { state.presets[pIdx].exercises.splice(exIdx,1); save(); renderPresets(); }
+
+        function openApplyPresetModal() {
+            if(state.presets.length === 0) return tg.showAlert("Сначала создайте пресет во вкладке 'Мои Пресеты'");
+            const cont = document.getElementById('preset-selection-list'); cont.innerHTML = '';
+            state.presets.forEach(p => {
+                cont.innerHTML += `<button class="btn btn-outline" style="margin-bottom:10px" onclick="applyPreset(${p.id})">${p.name}</button>`;
+            });
+            document.getElementById('apply-preset-modal').style.display = 'block';
+        }
+
+        function applyPreset(presetId) {
+            const preset = state.presets.find(p => p.id === presetId);
+            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
+            // Глубокое копирование упражнений, чтобы сбросить галочки "выполнено"
+            const exCopy = JSON.parse(JSON.stringify(preset.exercises)).map(ex => {
+                ex.sets.forEach(s => s.done = false); return ex;
+            });
+            state.workouts[state.selectedDate].push(...exCopy);
+            save(); closeModal('apply-preset-modal'); renderAll(); tg.showAlert("Пресет добавлен!");
+        }
+
+        // ================= МОДАЛКА УПРАЖНЕНИЙ =================
+        function openExModal(type, targetId = null) {
+            editContext = { type, targetId };
+            tempSets = [{w: 20, r: 10}];
+            document.getElementById('modal-ex-name').value = '';
+            document.getElementById('modal-ex-desc').value = '';
+            renderSetsEditor();
+            document.getElementById('ex-modal').style.display = 'block';
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function renderSetsEditor() {
+            const cont = document.getElementById('sets-editor'); cont.innerHTML = '';
+            tempSets.forEach((s, i) => {
+                cont.innerHTML += `<div class="set-edit-row">
+                    <input type="number" class="ios-input" value="${s.w}" onchange="tempSets[${i}].w=this.value" placeholder="Вес (кг)">
+                    <input type="number" class="ios-input" value="${s.r}" onchange="tempSets[${i}].r=this.value" placeholder="Повторы">
+                    <button class="btn btn-outline" style="color:red; border:none; padding:0;" onclick="tempSets.splice(${i},1); renderSetsEditor()">✕</button>
+                </div>`;
+            });
+        }
+        function addSetToEditor() { tempSets.push({w: 20, r: 10}); renderSetsEditor(); }
+
+        function saveExercise() {
+            const muscle = document.getElementById('modal-muscle').value;
+            const name = document.getElementById('modal-ex-name').value;
+            const desc = document.getElementById('modal-ex-desc').value;
+            if(!name) return tg.showAlert("Введите название упражнения");
+            
+            const ex = { muscle, name, desc, sets: JSON.parse(JSON.stringify(tempSets)) };
+
+            if(editContext.type === 'plan') {
+                if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
+                state.workouts[state.selectedDate].push(ex);
+            } else if (editContext.type === 'preset') {
+                const p = state.presets.find(p => p.id === editContext.targetId);
+                p.exercises.push(ex);
+            }
+            
+            save(); closeModal('ex-modal'); renderAll();
+        }
+
+        // ================= СТАТИСТИКА =================
+        function addWeight() {
+            const d = document.getElementById('stat-date').value;
+            const w = parseFloat(document.getElementById('stat-weight').value);
+            if(!d || !w) return;
+            
+            // Заменяем или добавляем
+            const existing = state.weights.find(x => x.date === d);
+            if(existing) existing.val = w;
+            else state.weights.push({date: d, val: w});
+            
+            state.weights.sort((a,b) => new Date(a.date) - new Date(b.date));
+            document.getElementById('stat-weight').value = '';
+            save(); renderStats();
+        }
+
+        function saveGoal() { state.goal = parseFloat(document.getElementById('goal-weight').value); save(); renderStats(); }
+
         function renderStats() {
-            if(!state.goal) return;
-            const lastWeight = state.weights.length ? state.weights[state.weights.length-1].val : 0;
-            const progress = Math.min(100, Math.max(0, (lastWeight / state.goal) * 100));
-            document.getElementById('goal-progress').style.width = progress + '%';
-            document.getElementById('goal-text').innerText = `Текущий вес: ${lastWeight}кг / Цель: ${state.goal}кг`;
+            // График
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: state.weights.map(w => w.date.substring(5)), // MM-DD
+                    datasets: [{ label: 'Вес (кг)', data: state.weights.map(w => w.val), borderColor: '#007AFF', backgroundColor: 'rgba(0, 122, 255, 0.1)', tension: 0.3, fill: true }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+
+            // Прогресс цели
+            if(state.goal && state.weights.length > 0) {
+                const lastW = state.weights[state.weights.length - 1].val;
+                // Простая логика: если худеем или набираем, считаем % достижения. 
+                // Для простоты покажем процент отношения текущего к цели
+                const percent = Math.min(100, (lastW / state.goal) * 100);
+                document.getElementById('goal-bar').style.width = percent + '%';
+                document.getElementById('goal-text').innerText = `Текущий: ${lastW} кг / Цель: ${state.goal} кг`;
+                document.getElementById('goal-weight').value = state.goal;
+            }
         }
 
-        // --- РАНДОМАЙЗЕР ---
-        function updateWheelList() {
+        // ================= РАНДОМАЙЗЕР =================
+        function addExToWheel() {
             const m = document.getElementById('wheel-muscle').value;
-            const list = state.library[m] || [];
-            document.getElementById('lib-list').innerHTML = list.map((ex, i) => `<div>${ex} <span onclick="state.library['${m}'].splice(${i},1); save(); updateWheelList()">✕</span></div>`).join('');
+            const name = document.getElementById('new-wheel-ex').value;
+            if(!name) return;
+            if(!state.wheelLib[m]) state.wheelLib[m] = [];
+            state.wheelLib[m].push(name);
+            document.getElementById('new-wheel-ex').value = '';
+            save(); updateWheelUI();
         }
-        function addToLib() {
+
+        function deleteExFromWheel(m, idx) {
+            state.wheelLib[m].splice(idx,1); save(); updateWheelUI();
+        }
+
+        function updateWheelUI() {
             const m = document.getElementById('wheel-muscle').value;
-            const name = document.getElementById('new-ex-lib').value;
-            if(!state.library[m]) state.library[m] = [];
-            state.library[m].push(name); save(); updateWheelList();
+            const list = state.wheelLib[m] || [];
+            document.getElementById('wheel-ex-list').innerHTML = list.map((ex, i) => 
+                `<div class="set-row"><span>${ex}</span> <span style="color:red; cursor:pointer;" onclick="deleteExFromWheel('${m}', ${i})">✕</span></div>`
+            ).join('');
+            drawWheel();
         }
+
+        function drawWheel() {
+            const m = document.getElementById('wheel-muscle').value;
+            const items = state.wheelLib[m] || [];
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height, radius = w/2;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            if(items.length === 0) {
+                ctx.fillStyle = '#e5e5ea'; ctx.beginPath(); ctx.arc(radius, radius, radius, 0, 2*Math.PI); ctx.fill();
+                ctx.fillStyle = '#8e8e93'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Добавьте упражнения', radius, radius);
+                return;
+            }
+
+            const arc = 2 * Math.PI / items.length;
+            const colors = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#5856D6', '#FF2D55', '#AF52DE'];
+
+            for(let i=0; i<items.length; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, i*arc, (i+1)*arc);
+                ctx.fill();
+                
+                // Текст
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(i*arc + arc/2);
+                ctx.fillStyle = "white"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "right";
+                ctx.fillText(items[i].substring(0, 15), radius - 10, 5);
+                ctx.restore();
+            }
+        }
+
         function spinWheel() {
             const m = document.getElementById('wheel-muscle').value;
-            const items = state.library[m];
-            if(!items || items.length === 0) return tg.showAlert("Список пуст");
-            const res = items[Math.floor(Math.random() * items.length)];
-            tg.showAlert("Выпало упражнение: " + res);
+            const items = state.wheelLib[m] || [];
+            if(items.length === 0) return tg.showAlert("Сначала добавьте упражнения для этой группы мышц!");
+
+            const canvas = document.getElementById('wheelCanvas');
+            // Делаем от 3 до 5 полных оборотов + случайный сектор
+            const extraDegrees = Math.floor(Math.random() * 360);
+            currentRotation += (360 * 4) + extraDegrees; 
+            
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            tg.HapticFeedback.impactOccurred('heavy');
+
+            setTimeout(() => {
+                // Вычисляем победителя
+                const normalized = currentRotation % 360;
+                // Колесо крутится по часовой, стрелка стоит сверху (на 270 градусах в Canvas, так как 0 это справа).
+                // Но мы просто крутим сам canvas через CSS, поэтому логика расчета сектора инвертируется.
+                const sectorSize = 360 / items.length;
+                // Сдвиг на 90 градусов (т.к. стрелка вверху)
+                let pointerAngle = (360 - normalized + 270) % 360; 
+                let winnerIndex = Math.floor(pointerAngle / sectorSize);
+                
+                tg.showAlert("Выпало: " + items[winnerIndex]);
+                tg.HapticFeedback.notificationOccurred('success');
+            }, 2000);
         }
 
+        // Общий рендер при загрузке и смене вкладок
         function renderAll() {
-            renderCalendar(); renderWorkouts(); renderStats(); updateWheelList();
+            if(document.getElementById('plan').classList.contains('active')) { renderCalendar(); renderWorkoutPlan(); }
+            if(document.getElementById('presets').classList.contains('active')) renderPresets();
+            if(document.getElementById('stats').classList.contains('active')) renderStats();
+            if(document.getElementById('random').classList.contains('active')) updateWheelUI();
         }
     </script>
 </body>
