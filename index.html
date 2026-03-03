@@ -3,135 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout Liquid Glass</title>
+    <title>Workout Liquid Glass V2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #00f2fe;
-            --text: #ffffff;
-            --text-hint: rgba(255, 255, 255, 0.6);
-            --danger: #ff4b4b;
+            --glass-bg: rgba(255, 255, 255, 0.08); --glass-border: rgba(255, 255, 255, 0.15);
+            --accent: #00f2fe; --text: #ffffff; --text-hint: rgba(255, 255, 255, 0.6);
+            --danger: #ff4b4b; --bg-gradient: linear-gradient(-45deg, #141e30, #243b55, #0f2027, #203a43);
         }
 
-        /* Анимированный градиентный фон */
-        body {
-            margin: 0; padding: 0; padding-bottom: 80px;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text);
-            background: linear-gradient(-45deg, #141e30, #243b55, #0f2027, #203a43);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;
-            -webkit-user-select: none;
-        }
+        body { margin: 0; padding: 0; padding-bottom: 80px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); background: var(--bg-gradient); background-size: 400% 400%; animation: gradientBG 15s ease infinite; min-height: 100vh; -webkit-user-select: none; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Liquid Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
-        }
-
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin: 15px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
         h2, h3, h4 { margin-top: 0; font-weight: 600; }
         
-        /* Инпуты и Кнопки */
-        .glass-input {
-            width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
-            color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px;
-            box-sizing: border-box; font-size: 16px; outline: none;
-        }
+        .glass-input { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; outline: none; }
         .glass-input::placeholder { color: var(--text-hint); }
         .glass-input option { background: #243b55; color: white; }
 
-        .btn {
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-            color: #000; border: none; padding: 14px; border-radius: 12px;
-            width: 100%; font-weight: bold; font-size: 16px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3); margin-top: 5px;
-        }
-        .btn-outline {
-            background: transparent; border: 1px solid var(--accent);
-            color: var(--accent); box-shadow: none;
-        }
+        .btn { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); color: #000; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3); margin-top: 5px; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); box-shadow: none; }
 
-        /* Страницы */
-        .page { display: none; animation: fadeIn 0.3s ease; }
-        .page.active { display: block; }
+        .page { display: none; animation: fadeIn 0.3s ease; } .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Нижнее меню (Tab Bar) */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(15, 32, 39, 0.85); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);
-            display: flex; justify-content: space-around; align-items: center;
-            height: 70px; padding-bottom: env(safe-area-inset-bottom); z-index: 2000;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-hint); font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--accent); transform: scale(1.1); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; }
+        /* Иконки и Nav Bar */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 32, 39, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; height: 70px; padding-bottom: env(safe-area-inset-bottom); z-index: 2000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-hint); font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.3s; fill: var(--text-hint); stroke: var(--text-hint); }
+        .nav-item.active { color: var(--accent); fill: var(--accent); stroke: var(--accent); transform: scale(1.05); }
+        .nav-icon { width: 24px; height: 24px; margin-bottom: 4px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+        /* Календарь (Мини) */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day { text-align: center; padding: 8px 0; font-size: 14px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); position: relative; }
+        .cal-day.selected { background: var(--accent); color: #000; font-weight: bold; }
+        .cal-day .dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin: 2px auto 0; }
+        .cal-day.selected .dot { background: #000; }
 
         /* Элементы Списков */
         .row-between { display: flex; justify-content: space-between; align-items: center; }
-        .set-row {
-            background: rgba(0,0,0,0.15); padding: 12px; border-radius: 12px;
-            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-        }
+        .set-row { background: rgba(0,0,0,0.15); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .check-box { width: 24px; height: 24px; border: 2px solid var(--accent); border-radius: 50%; transition: 0.3s; }
         .check-box.done { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
         .delete-btn { color: var(--danger); cursor: pointer; font-weight: bold; padding: 5px; }
 
-        /* Модалка */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; overflow-y: auto; }
         
-        canvas { filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.2)); }
+        /* Тепловая карта */
+        .heatmap-container { display: flex; justify-content: center; margin: 10px 0; position: relative; height: 250px; }
+        .heatmap-svg { height: 100%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
+        .muscle-path { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.3); stroke-width: 1.5; transition: fill 0.5s, filter 0.5s; }
+        
+        .gender-toggle { display: flex; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 3px; width: fit-content; margin: 0 auto; }
+        .gender-btn { padding: 5px 15px; border-radius: 12px; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .gender-btn.active { background: var(--accent); color: #000; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <div style="padding: 20px 15px 0;">
-            <h1 id="greeting" style="margin:0; font-size: 28px;">Привет, Атлет!</h1>
-            <p style="color: var(--text-hint); margin-top: 5px;">Готов стать лучше сегодня?</p>
+        <div class="row-between" style="padding: 20px 15px 0;">
+            <div>
+                <h1 id="greeting" style="margin:0; font-size: 24px;">Привет, Атлет!</h1>
+                <p style="color: var(--text-hint); margin-top: 5px; font-size: 14px;">Тепловая карта мышц</p>
+            </div>
+            <div class="gender-toggle">
+                <div id="btn-male" class="gender-btn active" onclick="setGender('male')">👨</div>
+                <div id="btn-female" class="gender-btn" onclick="setGender('female')">👩</div>
+            </div>
+        </div>
+
+        <div class="heatmap-container" id="heatmap-wrapper">
+            </div>
+
+        <div class="glass-card">
+            <h3>Калькулятор 1ПМ</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="orm-weight" class="glass-input" placeholder="Вес (кг)" inputmode="decimal">
+                <input type="number" id="orm-reps" class="glass-input" placeholder="Повторы" inputmode="numeric">
+            </div>
+            <button class="btn btn-outline" onclick="calculate1RM()">Рассчитать Максимум</button>
+            <p id="orm-result" style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 0; color: var(--accent);"></p>
         </div>
 
         <div class="glass-card">
             <h3 style="color: var(--accent)">💡 Инсайт дня</h3>
-            <p id="daily-quote" style="font-style: italic; line-height: 1.5;"></p>
-        </div>
-
-        <div class="glass-card">
-            <h3>Активность сегодня</h3>
-            <div id="home-today-summary" style="color: var(--text-hint);">Загрузка...</div>
-            <button class="btn" style="margin-top: 15px;" onclick="nav('plan')">Перейти к плану</button>
+            <p id="daily-quote" style="font-style: italic; line-height: 1.5; margin-bottom: 0;"></p>
         </div>
     </div>
 
     <div id="plan" class="page">
         <div class="glass-card">
-            <input type="date" id="plan-date" class="glass-input" onchange="changeDate()">
+            <div class="cal-header">
+                <span onclick="changeMonth(-1)" style="cursor:pointer; padding:5px; font-size:20px">‹</span>
+                <span id="month-label">Месяц</span>
+                <span onclick="changeMonth(1)" style="cursor:pointer; padding:5px; font-size:20px">›</span>
+            </div>
+            <div id="calendar" class="cal-grid"></div>
         </div>
         
         <div class="glass-card" id="day-detail">
-            <h3 id="selected-date-label" style="margin-top:0; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">План на сегодня</h3>
+            <div class="row-between" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 id="selected-date-label" style="margin:0;">План на сегодня</h3>
+            </div>
             <div id="workout-list"></div>
             <button class="btn btn-outline" style="margin-top: 15px;" onclick="openExModal('plan')">+ Добавить упражнение</button>
             <button class="btn btn-outline" style="margin-top:10px" onclick="nav('presets')">📋 Мои Пресеты</button>
@@ -149,21 +126,21 @@
 
     <div id="stats" class="page">
         <div class="glass-card">
-            <h3>Запись веса</h3>
+            <h3>Запись веса (любая дата)</h3>
             <input type="date" id="stat-date" class="glass-input">
-            <input type="number" id="stat-weight" class="glass-input" placeholder="Ваш вес (кг)">
+            <input type="number" id="stat-weight" class="glass-input" placeholder="Введите вес (кг)" inputmode="decimal">
             <button class="btn" onclick="addWeight()">Сохранить вес</button>
         </div>
         
         <div class="glass-card">
             <div class="row-between">
                 <h3>Прогресс</h3>
-                <span style="color: var(--accent); cursor: pointer;" onclick="setGoal()">🎯 Задать цель</span>
+                <span style="color: var(--accent); cursor: pointer;" onclick="setGoal()">🎯 Цель</span>
             </div>
             <p id="goal-text" style="color: var(--text-hint); font-size: 14px; margin-top:0;"></p>
             <canvas id="weightChart"></canvas>
             
-            <h4 style="margin-top: 20px;">История замеров</h4>
+            <h4 style="margin-top: 20px;">История</h4>
             <div id="weight-history-list"></div>
         </div>
     </div>
@@ -181,30 +158,34 @@
         </div>
         
         <div class="glass-card">
-            <input type="text" id="new-wheel-ex" class="glass-input" placeholder="Новое упражнение в базу">
-            <button class="btn btn-outline" onclick="addExToWheel()">Добавить</button>
+            <input type="text" id="new-wheel-ex" class="glass-input" placeholder="Новое упражнение">
+            <button class="btn btn-outline" onclick="addExToWheel()">В базу колеса</button>
             <div id="wheel-ex-list" style="margin-top:15px"></div>
         </div>
     </div>
 
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="nav('home', this)">
-            <span class="nav-icon">🏠</span><span>Главная</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Главная</span>
         </div>
         <div class="nav-item" onclick="nav('plan', this)">
-            <span class="nav-icon">💪</span><span>План</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>План</span>
         </div>
         <div class="nav-item" onclick="nav('stats', this)">
-            <span class="nav-icon">📈</span><span>Прогресс</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span>Прогресс</span>
         </div>
         <div class="nav-item" onclick="nav('random', this)">
-            <span class="nav-icon">🎡</span><span>Колесо</span>
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="12" x2="20.66" y2="17"></line><line x1="12" y1="12" x2="3.34" y2="17"></line></svg>
+            <span>Колесо</span>
         </div>
     </nav>
 
     <div id="ex-modal" class="modal">
         <div class="glass-card" style="margin-top: 40px;">
-            <h3>Настройка упражнения</h3>
+            <h3>Настройка</h3>
             <select id="modal-muscle" class="glass-input"></select>
             <input type="text" id="modal-ex-name" class="glass-input" placeholder="Название">
             
@@ -219,95 +200,144 @@
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
         const MUSCLES = ["Грудь", "Плечи", "Бицепс", "Трицепс", "Трапеция", "Спина", "Ноги"];
-        
-        const QUOTES = [
-            "Мышцы растут, когда ты отдыхаешь. Не забывай про сон!",
-            "Твое тело может выдержать почти все. Главное — убедить в этом свой разум.",
-            "Дисциплина — это решение делать то, чего не хочется, чтобы достичь того, чего хочется.",
-            "Не сравнивай себя с другими. Сравнивай себя с собой вчерашним.",
-            "Базовые упражнения — фундамент любой программы. Не пренебрегай ими."
-        ];
+        const QUOTES = ["Мышцы растут, когда ты отдыхаешь.", "Твое тело может выдержать почти все.", "Дисциплина решает.", "Только вперед!"];
 
         let state = {
-            selectedDate: new Date().toISOString().split('T')[0],
-            workouts: {}, presets: [], weights: [], goal: null, wheelLib: {}
+            selectedDate: new Date().toISOString().split('T')[0], curMonth: new Date(),
+            workouts: {}, presets: [], weights: [], goal: null, wheelLib: {}, gender: 'male'
         };
-        
         MUSCLES.forEach(m => { if(!state.wheelLib[m]) state.wheelLib[m] = []; });
-        let editContext = { type: null, targetId: null };
-        let tempSets = [];
-        let chartInstance = null;
-        let currentRotation = 0;
+        let tempSets = [], editContext = { type: null, targetId: null }, chartInstance = null, currentRotation = 0;
 
         window.onload = () => {
-            document.getElementById('plan-date').value = state.selectedDate;
             document.getElementById('stat-date').value = state.selectedDate;
+            document.getElementById('daily-quote').innerText = QUOTES[Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000) % QUOTES.length];
+            if(tg.initDataUnsafe?.user?.first_name) document.getElementById('greeting').innerText = `Привет, ${tg.initDataUnsafe.user.first_name}!`;
             
-            // Задаем цитату дня на основе дня года
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-            document.getElementById('daily-quote').innerText = QUOTES[dayOfYear % QUOTES.length];
-            
-            if(tg.initDataUnsafe?.user?.first_name) {
-                document.getElementById('greeting').innerText = `Привет, ${tg.initDataUnsafe.user.first_name}!`;
-            }
-
             MUSCLES.forEach(m => {
                 document.getElementById('modal-muscle').innerHTML += `<option value="${m}">${m}</option>`;
                 document.getElementById('wheel-muscle').innerHTML += `<option value="${m}">${m}</option>`;
             });
 
-            tg.CloudStorage.getItem('gymData', (err, val) => {
-                if(!err && val) {
-                    const d = JSON.parse(val);
-                    state = {...state, ...d};
-                }
-                renderAll();
+            tg.CloudStorage.getItem('gymUltimate', (err, val) => {
+                if(!err && val) { state = {...state, ...JSON.parse(val)}; state.curMonth = new Date(state.selectedDate); }
+                setGender(state.gender); // Вызовет renderAll
             });
         };
 
-        function save() { tg.CloudStorage.setItem('gymData', JSON.stringify(state)); }
+        function save() { tg.CloudStorage.setItem('gymUltimate', JSON.stringify(state)); renderHeatmap(); }
 
         function nav(pageId, el = null) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
+            if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+            renderAll();
+        }
+
+        // ================= ТЕПЛОВАЯ КАРТА И ПОЛ =================
+        function setGender(g) {
+            state.gender = g; save();
+            document.getElementById('btn-male').classList.toggle('active', g === 'male');
+            document.getElementById('btn-female').classList.toggle('active', g === 'female');
+            renderHeatmap();
+        }
+
+        function renderHeatmap() {
+            const today = new Date(); today.setHours(0,0,0,0);
+            let fatigue = { "Грудь": 99, "Плечи": 99, "Бицепс": 99, "Трицепс": 99, "Трапеция": 99, "Спина": 99, "Ноги": 99 };
             
-            if(el) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                el.classList.add('active');
-            }
-            renderAll();
+            // Анализируем тренировки
+            Object.keys(state.workouts).forEach(dateStr => {
+                const wDate = new Date(dateStr); wDate.setHours(0,0,0,0);
+                const diffDays = Math.floor((today - wDate) / (1000 * 60 * 60 * 24));
+                if(diffDays >= 0 && diffDays <= 4) {
+                    state.workouts[dateStr].forEach(ex => {
+                        if(diffDays < fatigue[ex.muscle]) fatigue[ex.muscle] = diffDays;
+                    });
+                }
+            });
+
+            const getColor = (days) => {
+                if(days === 0) return { fill: 'rgba(255, 75, 75, 0.8)', glow: 'drop-shadow(0 0 8px #ff4b4b)' }; // Красный
+                if(days === 1) return { fill: 'rgba(255, 149, 0, 0.8)', glow: 'drop-shadow(0 0 6px #ff9500)' }; // Оранжевый
+                if(days === 2) return { fill: 'rgba(255, 214, 10, 0.7)', glow: 'drop-shadow(0 0 5px #ffd60a)' }; // Желтый
+                if(days === 3) return { fill: 'rgba(52, 199, 89, 0.6)', glow: 'drop-shadow(0 0 4px #34c759)' }; // Зеленый
+                return { fill: 'rgba(255,255,255,0.05)', glow: 'none' };
+            };
+
+            // Стилизованные прозрачные SVG силуэты 
+            const isMale = state.gender === 'male';
+            const svgBody = isMale ? 
+                `<path d="M85 40 Q100 20 115 40 L130 90 L110 160 L115 250 L95 250 L100 160 L85 160 L90 250 L70 250 L75 160 L55 90 Z" fill="none" stroke="rgba(255,255,255,0.2)"/>` : 
+                `<path d="M90 40 Q100 25 110 40 L125 90 L105 140 Q120 170 115 250 L95 250 L100 150 L85 150 L90 250 L70 250 Q65 170 80 140 L60 90 Z" fill="none" stroke="rgba(255,255,255,0.2)"/>`;
+
+            const mPaths = {
+                "Трапеция": `<path d="M85 40 Q100 30 115 40 L120 50 L80 50 Z" class="muscle-path"/>`,
+                "Плечи": `<circle cx="58" cy="65" r="12" class="muscle-path"/><circle cx="127" cy="65" r="12" class="muscle-path"/>`,
+                "Грудь": `<path d="M75 55 Q100 55 100 75 Q75 75 75 55 M125 55 Q100 55 100 75 Q125 75 125 55" class="muscle-path"/>`,
+                "Спина": `<path d="M70 75 L100 120 L130 75 Z" class="muscle-path"/>`,
+                "Бицепс": `<ellipse cx="52" cy="95" rx="8" ry="15" class="muscle-path"/><ellipse cx="133" cy="95" rx="8" ry="15" class="muscle-path"/>`,
+                "Трицепс": `<path d="M42 85 Q40 100 48 110 L52 85 Z" class="muscle-path"/><path d="M143 85 Q145 100 137 110 L133 85 Z" class="muscle-path"/>`,
+                "Ноги": `<path d="M75 160 L95 160 L90 240 L70 240 Z" class="muscle-path"/><path d="M110 160 L105 240 L125 240 L115 160 Z" class="muscle-path"/>`
+            };
+
+            let svgContent = `<svg viewBox="30 20 140 240" class="heatmap-svg">${svgBody}`;
+            Object.keys(mPaths).forEach(m => {
+                const c = getColor(fatigue[m]);
+                // Инжектируем стили напрямую в path
+                const styledPath = mPaths[m].replace('class="muscle-path"', `class="muscle-path" style="fill:${c.fill}; filter:${c.glow}"`);
+                svgContent += styledPath;
+            });
+            svgContent += `</svg>`;
+            document.getElementById('heatmap-wrapper').innerHTML = svgContent;
         }
 
-        // ================= ГЛАВНАЯ =================
-        function updateHomeSummary() {
-            const todayPlan = state.workouts[state.selectedDate] || [];
-            const sumDiv = document.getElementById('home-today-summary');
-            if(todayPlan.length === 0) {
-                sumDiv.innerHTML = "На сегодня тренировок не запланировано. Отдыхаем? 🛌";
+        // ================= 1ПМ Калькулятор =================
+        function calculate1RM() {
+            const w = parseFloat(document.getElementById('orm-weight').value);
+            const r = parseFloat(document.getElementById('orm-reps').value);
+            if(w && r) {
+                const orm = Math.round(w * (1 + r / 30));
+                document.getElementById('orm-result').innerText = `Твой 1ПМ: ~${orm} кг`;
             } else {
-                const totalSets = todayPlan.reduce((acc, ex) => acc + ex.sets.length, 0);
-                const doneSets = todayPlan.reduce((acc, ex) => acc + ex.sets.filter(s => s.done).length, 0);
-                sumDiv.innerHTML = `<b style="color:var(--text)">${todayPlan.length}</b> упражнений<br>Выполнено: <b style="color:var(--accent)">${doneSets} / ${totalSets}</b> подходов`;
+                tg.showAlert("Введите вес и количество повторений");
             }
         }
 
-        // ================= ПЛАН =================
-        function changeDate() {
-            state.selectedDate = document.getElementById('plan-date').value;
-            renderAll();
+        // ================= КАЛЕНДАРЬ И ПЛАН =================
+        function changeMonth(dir) { state.curMonth.setMonth(state.curMonth.getMonth() + dir); renderCalendar(); }
+        
+        function renderCalendar() {
+            const grid = document.getElementById('calendar'); grid.innerHTML = '';
+            const m = state.curMonth.getMonth(), y = state.curMonth.getFullYear();
+            document.getElementById('month-label').innerText = new Intl.DateTimeFormat('ru', {month:'long', year:'numeric'}).format(state.curMonth);
+            
+            let firstDay = new Date(y, m, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let daysInMonth = new Date(y, m + 1, 0).getDate();
+
+            for(let i=0; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateIso = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const el = document.createElement('div');
+                el.className = `cal-day ${dateIso === state.selectedDate ? 'selected' : ''}`;
+                el.innerText = d;
+                if(state.workouts[dateIso] && state.workouts[dateIso].length > 0) el.innerHTML += '<div class="dot"></div>';
+                
+                el.onclick = () => { state.selectedDate = dateIso; document.getElementById('stat-date').value = dateIso; renderAll(); };
+                grid.appendChild(el);
+            }
+            document.getElementById('selected-date-label').innerText = `План на ${state.selectedDate}`;
         }
 
         function renderPlan() {
             const cont = document.getElementById('workout-list'); cont.innerHTML = '';
             const list = state.workouts[state.selectedDate] || [];
-            
-            if(list.length === 0) cont.innerHTML = '<p style="color:var(--text-hint); text-align:center;">Пусто. Нажми кнопку ниже, чтобы добавить.</p>';
+            if(list.length === 0) { cont.innerHTML = '<p style="color:var(--text-hint); text-align:center;">Отдыхаем или добавляем тренировку!</p>'; return; }
 
             list.forEach((ex, exIdx) => {
                 let html = `<div class="glass-card" style="padding: 15px 10px;">
                     <div class="row-between" style="margin-bottom: 10px; border-bottom: 1px solid var(--glass-border); padding-bottom: 5px;">
-                        <b>${ex.muscle}: ${ex.name}</b>
-                        <span class="delete-btn" onclick="deleteExFromPlan(${exIdx})">✕</span>
+                        <b>${ex.muscle}: ${ex.name}</b> <span class="delete-btn" onclick="deleteExFromPlan(${exIdx})">✕</span>
                     </div>`;
                 ex.sets.forEach((s, sIdx) => {
                     html += `<div class="set-row" onclick="toggleSet(${exIdx}, ${sIdx})">
@@ -319,215 +349,79 @@
             });
         }
 
-        function deleteExFromPlan(idx) { state.workouts[state.selectedDate].splice(idx,1); save(); renderPlan(); updateHomeSummary(); }
-        function toggleSet(eI, sI) { 
-            state.workouts[state.selectedDate][eI].sets[sI].done = !state.workouts[state.selectedDate][eI].sets[sI].done; 
-            save(); renderPlan(); updateHomeSummary(); tg.HapticFeedback.selectionChanged();
-        }
+        function deleteExFromPlan(idx) { state.workouts[state.selectedDate].splice(idx,1); save(); renderAll(); }
+        function toggleSet(eI, sI) { state.workouts[state.selectedDate][eI].sets[sI].done = !state.workouts[state.selectedDate][eI].sets[sI].done; save(); renderPlan(); tg.HapticFeedback.selectionChanged(); }
 
         // ================= ПРЕСЕТЫ =================
-        function createPreset() {
-            const n = document.getElementById('preset-name').value;
-            if(!n) return;
-            state.presets.push({ id: Date.now(), name: n, ex: [] });
-            document.getElementById('preset-name').value = '';
-            save(); renderPresets();
-        }
-
+        function createPreset() { const n = document.getElementById('preset-name').value; if(n) { state.presets.push({ id: Date.now(), name: n, ex: [] }); document.getElementById('preset-name').value = ''; save(); renderPresets(); } }
         function renderPresets() {
             const cont = document.getElementById('presets-list'); cont.innerHTML = '';
             state.presets.forEach((p, pIdx) => {
-                let html = `<div class="glass-card">
-                    <div class="row-between">
-                        <h3 style="color:var(--accent); margin:0;">${p.name}</h3>
-                        <span class="delete-btn" onclick="deletePreset(${pIdx})">Удалить</span>
-                    </div>
-                    <hr style="border:0; border-top:1px solid var(--glass-border); margin: 10px 0;">`;
-                
-                p.ex.forEach((ex, eIdx) => {
-                    html += `<div class="row-between" style="font-size: 14px; margin-bottom: 5px;">
-                        <span>${ex.muscle}: ${ex.name} (${ex.sets.length} подх.)</span>
-                        <span class="delete-btn" onclick="deleteExFromPreset(${pIdx}, ${eIdx})">✕</span>
-                    </div>`;
-                });
-                
-                html += `<div style="display:flex; gap:10px; margin-top:15px;">
-                    <button class="btn btn-outline" style="font-size:12px; padding:10px;" onclick="openExModal('preset', ${p.id})">+ Упражнение</button>
-                    <button class="btn" style="font-size:12px; padding:10px;" onclick="applyPreset(${p.id})">Вставить в План</button>
-                </div></div>`;
+                let html = `<div class="glass-card"><div class="row-between"><h3 style="color:var(--accent); margin:0;">${p.name}</h3><span class="delete-btn" onclick="deletePreset(${pIdx})">Удалить</span></div><hr style="border:0; border-top:1px solid var(--glass-border); margin: 10px 0;">`;
+                p.ex.forEach((ex, eIdx) => { html += `<div class="row-between" style="font-size: 14px; margin-bottom: 5px;"><span>${ex.muscle}: ${ex.name}</span><span class="delete-btn" onclick="deleteExFromPreset(${pIdx}, ${eIdx})">✕</span></div>`; });
+                html += `<div style="display:flex; gap:10px; margin-top:15px;"><button class="btn btn-outline" style="font-size:12px; padding:10px;" onclick="openExModal('preset', ${p.id})">+ Упр.</button><button class="btn" style="font-size:12px; padding:10px;" onclick="applyPreset(${p.id})">В План</button></div></div>`;
                 cont.innerHTML += html;
             });
         }
-
-        function applyPreset(pId) {
-            const p = state.presets.find(x => x.id === pId);
-            if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
-            const copy = JSON.parse(JSON.stringify(p.ex)).map(e => { e.sets.forEach(s => s.done=false); return e; });
-            state.workouts[state.selectedDate].push(...copy);
-            save(); tg.showAlert("Пресет добавлен в текущий день!"); renderAll();
-        }
+        function applyPreset(pId) { const p = state.presets.find(x => x.id === pId); if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = []; state.workouts[state.selectedDate].push(...JSON.parse(JSON.stringify(p.ex)).map(e => { e.sets.forEach(s => s.done=false); return e; })); save(); tg.showAlert("Пресет добавлен!"); renderAll(); }
         function deletePreset(i) { state.presets.splice(i,1); save(); renderPresets(); }
         function deleteExFromPreset(pI, eI) { state.presets[pI].ex.splice(eI,1); save(); renderPresets(); }
 
         // ================= СТАТИСТИКА =================
         function addWeight() {
-            const d = document.getElementById('stat-date').value;
-            const w = parseFloat(document.getElementById('stat-weight').value);
-            if(!d || !w) return;
-            
-            const exIdx = state.weights.findIndex(x => x.date === d);
-            if(exIdx > -1) state.weights[exIdx].val = w;
-            else state.weights.push({date: d, val: w});
-            
-            state.weights.sort((a,b) => new Date(a.date) - new Date(b.date));
-            document.getElementById('stat-weight').value = '';
-            save(); renderStats();
+            const d = document.getElementById('stat-date').value; const w = parseFloat(document.getElementById('stat-weight').value);
+            if(d && w) { const i = state.weights.findIndex(x => x.date === d); if(i > -1) state.weights[i].val = w; else state.weights.push({date: d, val: w}); state.weights.sort((a,b) => new Date(a.date) - new Date(b.date)); document.getElementById('stat-weight').value = ''; save(); renderStats(); }
         }
-
-        function deleteWeight(idx) {
-            state.weights.splice(idx, 1);
-            save(); renderStats();
-        }
-
-        function setGoal() {
-            tg.showPopup({
-                title: 'Цель', message: 'Введите желаемый вес (кг)',
-                buttons: [{id: 'ok', type: 'default', text: 'Задать'}] // Упрощенно через prompt или свой UI. Для простоты используем prompt в вебе:
-            }, (btn) => {});
-            let g = prompt("Твоя цель по весу (кг):", state.goal || "");
-            if(g && !isNaN(g)) { state.goal = parseFloat(g); save(); renderStats(); }
-        }
+        function deleteWeight(idx) { state.weights.splice(idx, 1); save(); renderStats(); }
+        function setGoal() { let g = prompt("Твоя цель по весу (кг):", state.goal || ""); if(g && !isNaN(g)) { state.goal = parseFloat(g); save(); renderStats(); } }
 
         function renderStats() {
-            const histCont = document.getElementById('weight-history-list');
-            histCont.innerHTML = '';
+            const histCont = document.getElementById('weight-history-list'); histCont.innerHTML = '';
+            [...state.weights].reverse().forEach((w, i) => { histCont.innerHTML += `<div class="set-row"><span>${w.date} ➔ <b>${w.val} кг</b></span><span class="delete-btn" onclick="deleteWeight(${state.weights.length - 1 - i})">Удалить</span></div>`; });
+            if(state.goal) { const lastW = state.weights.length ? state.weights[state.weights.length-1].val : 0; document.getElementById('goal-text').innerHTML = `Текущий: <b>${lastW}</b> кг / Цель: <b>${state.goal}</b> кг`; }
             
-            // Заполняем историю (с конца, чтобы новые были сверху)
-            [...state.weights].reverse().forEach((w, i) => {
-                // реальный индекс в оригинальном массиве
-                const realIdx = state.weights.length - 1 - i;
-                histCont.innerHTML += `
-                    <div class="set-row">
-                        <span>${w.date} ➔ <b>${w.val} кг</b></span>
-                        <span class="delete-btn" onclick="deleteWeight(${realIdx})">Удалить</span>
-                    </div>`;
-            });
-
-            if(state.goal) {
-                const lastW = state.weights.length ? state.weights[state.weights.length-1].val : 0;
-                document.getElementById('goal-text').innerHTML = `Текущий: <b>${lastW}</b> кг / Цель: <b>${state.goal}</b> кг`;
-            }
-
-            const ctx = document.getElementById('weightChart').getContext('2d');
             if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: state.weights.map(w => w.date.substring(5)),
-                    datasets: [{ 
-                        label: 'Вес (кг)', data: state.weights.map(w => w.val), 
-                        borderColor: '#00f2fe', backgroundColor: 'rgba(0, 242, 254, 0.2)', 
-                        tension: 0.4, fill: true, pointBackgroundColor: '#fff' 
-                    }]
-                },
+            chartInstance = new Chart(document.getElementById('weightChart').getContext('2d'), {
+                type: 'line', data: { labels: state.weights.map(w => w.date.substring(5)), datasets: [{ label: 'Вес (кг)', data: state.weights.map(w => w.val), borderColor: '#00f2fe', backgroundColor: 'rgba(0, 242, 254, 0.2)', tension: 0.4, fill: true, pointBackgroundColor: '#fff' }] },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } }, x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#fff' } } } }
             });
         }
 
         // ================= РАНДОМАЙЗЕР =================
-        function addExToWheel() {
-            const m = document.getElementById('wheel-muscle').value;
-            const name = document.getElementById('new-wheel-ex').value;
-            if(!name) return;
-            state.wheelLib[m].push(name);
-            document.getElementById('new-wheel-ex').value = '';
-            save(); updateWheelUI();
-        }
-
+        function addExToWheel() { const m = document.getElementById('wheel-muscle').value; const n = document.getElementById('new-wheel-ex').value; if(n) { state.wheelLib[m].push(n); document.getElementById('new-wheel-ex').value = ''; save(); updateWheelUI(); } }
         function updateWheelUI() {
-            const m = document.getElementById('wheel-muscle').value;
-            const list = state.wheelLib[m] || [];
-            document.getElementById('wheel-ex-list').innerHTML = list.map((ex, i) => 
-                `<div class="set-row"><span>${ex}</span> <span class="delete-btn" onclick="state.wheelLib['${m}'].splice(${i},1); save(); updateWheelUI()">✕</span></div>`
-            ).join('');
-            drawWheel();
+            const m = document.getElementById('wheel-muscle').value; const list = state.wheelLib[m] || [];
+            document.getElementById('wheel-ex-list').innerHTML = list.map((ex, i) => `<div class="set-row"><span>${ex}</span> <span class="delete-btn" onclick="state.wheelLib['${m}'].splice(${i},1); save(); updateWheelUI()">✕</span></div>`).join(''); drawWheel();
         }
-
         function drawWheel() {
-            const m = document.getElementById('wheel-muscle').value;
-            const items = state.wheelLib[m] || [];
-            const canvas = document.getElementById('wheelCanvas');
-            const ctx = canvas.getContext('2d');
-            const radius = canvas.width/2;
-            ctx.clearRect(0,0, radius*2, radius*2);
-            
-            if(items.length === 0) {
-                ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.beginPath(); ctx.arc(radius, radius, radius, 0, 2*Math.PI); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Добавьте упражнения', radius, radius); return;
-            }
-
-            const arc = 2 * Math.PI / items.length;
-            const colors = ['#00f2fe', '#4facfe', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
-
-            for(let i=0; i<items.length; i++) {
-                ctx.beginPath(); ctx.fillStyle = colors[i % colors.length]; ctx.moveTo(radius, radius); ctx.arc(radius, radius, radius, i*arc, (i+1)*arc); ctx.fill();
-                ctx.save(); ctx.translate(radius, radius); ctx.rotate(i*arc + arc/2);
-                ctx.fillStyle = "#fff"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "right";
-                ctx.fillText(items[i].substring(0, 15), radius - 10, 5); ctx.restore();
-            }
+            const items = state.wheelLib[document.getElementById('wheel-muscle').value] || []; const canvas = document.getElementById('wheelCanvas'); const ctx = canvas.getContext('2d'); const r = canvas.width/2; ctx.clearRect(0,0, r*2, r*2);
+            if(!items.length) { ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.beginPath(); ctx.arc(r, r, r, 0, 2*Math.PI); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Добавьте упражнения', r, r); return; }
+            const arc = 2 * Math.PI / items.length, colors = ['#00f2fe', '#4facfe', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
+            for(let i=0; i<items.length; i++) { ctx.beginPath(); ctx.fillStyle = colors[i % colors.length]; ctx.moveTo(r, r); ctx.arc(r, r, r, i*arc, (i+1)*arc); ctx.fill(); ctx.save(); ctx.translate(r, r); ctx.rotate(i*arc + arc/2); ctx.fillStyle = "#fff"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "right"; ctx.fillText(items[i].substring(0, 15), r - 10, 5); ctx.restore(); }
         }
-
         function spinWheel() {
-            const items = state.wheelLib[document.getElementById('wheel-muscle').value] || [];
-            if(items.length === 0) return;
-            currentRotation += (360 * 5) + Math.floor(Math.random() * 360); 
-            document.getElementById('wheelCanvas').style.transform = `rotate(${currentRotation}deg)`;
-            tg.HapticFeedback.impactOccurred('heavy');
-            setTimeout(() => {
-                const sectorSize = 360 / items.length;
-                let pointerAngle = (360 - (currentRotation % 360) + 270) % 360; 
-                tg.showAlert("Шокируем мышцы: " + items[Math.floor(pointerAngle / sectorSize)]);
-            }, 2500);
+            const items = state.wheelLib[document.getElementById('wheel-muscle').value] || []; if(!items.length) return;
+            currentRotation += (360 * 5) + Math.floor(Math.random() * 360); document.getElementById('wheelCanvas').style.transform = `rotate(${currentRotation}deg)`; tg.HapticFeedback.impactOccurred('heavy');
+            setTimeout(() => { tg.showAlert("Выпало: " + items[Math.floor(((360 - (currentRotation % 360) + 270) % 360) / (360 / items.length))]); }, 2500);
         }
 
-        // ================= МОДАЛКА УПРАЖНЕНИЙ =================
-        function openExModal(type, tId = null) {
-            editContext = { type, targetId: tId }; tempSets = [{w: 20, r: 10}];
-            document.getElementById('modal-ex-name').value = ''; renderSetsEditor();
-            document.getElementById('ex-modal').style.display = 'block';
-        }
+        // ================= МОДАЛКА =================
+        function openExModal(type, tId = null) { editContext = { type, targetId: tId }; tempSets = [{w: 20, r: 10}]; document.getElementById('modal-ex-name').value = ''; renderSetsEditor(); document.getElementById('ex-modal').style.display = 'block'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
         function renderSetsEditor() {
-            const cont = document.getElementById('sets-editor'); cont.innerHTML = '';
-            tempSets.forEach((s, i) => {
-                cont.innerHTML += `<div style="display:grid; grid-template-columns: 1fr 1fr 40px; gap:8px; margin-bottom:5px;">
-                    <input type="number" class="glass-input" style="margin:0;" value="${s.w}" onchange="tempSets[${i}].w=this.value" placeholder="кг">
-                    <input type="number" class="glass-input" style="margin:0;" value="${s.r}" onchange="tempSets[${i}].r=this.value" placeholder="повт">
-                    <button class="btn btn-outline" style="border-color:var(--danger); color:var(--danger); padding:0; margin:0;" onclick="tempSets.splice(${i},1); renderSetsEditor()">✕</button>
-                </div>`;
-            });
+            document.getElementById('sets-editor').innerHTML = tempSets.map((s, i) => `<div style="display:grid; grid-template-columns: 1fr 1fr 40px; gap:8px; margin-bottom:5px;"><input type="number" class="glass-input" style="margin:0;" value="${s.w}" onchange="tempSets[${i}].w=this.value" placeholder="кг" inputmode="decimal"><input type="number" class="glass-input" style="margin:0;" value="${s.r}" onchange="tempSets[${i}].r=this.value" placeholder="повт" inputmode="numeric"><button class="btn btn-outline" style="border-color:var(--danger); color:var(--danger); padding:0; margin:0;" onclick="tempSets.splice(${i},1); renderSetsEditor()">✕</button></div>`).join('');
         }
         function addSetToEditor() { tempSets.push({w: 20, r: 10}); renderSetsEditor(); }
-
         function saveExercise() {
-            const m = document.getElementById('modal-muscle').value;
-            const n = document.getElementById('modal-ex-name').value;
-            if(!n) return;
+            const m = document.getElementById('modal-muscle').value, n = document.getElementById('modal-ex-name').value; if(!n) return;
             const ex = { muscle: m, name: n, sets: JSON.parse(JSON.stringify(tempSets)) };
-
-            if(editContext.type === 'plan') {
-                if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = [];
-                state.workouts[state.selectedDate].push(ex);
-            } else {
-                state.presets.find(p => p.id === editContext.targetId).ex.push(ex);
-            }
+            if(editContext.type === 'plan') { if(!state.workouts[state.selectedDate]) state.workouts[state.selectedDate] = []; state.workouts[state.selectedDate].push(ex); } else { state.presets.find(p => p.id === editContext.targetId).ex.push(ex); }
             save(); closeModal('ex-modal'); renderAll();
         }
 
         function renderAll() {
-            updateHomeSummary();
-            if(document.getElementById('plan').classList.contains('active')) renderPlan();
+            renderHeatmap();
+            if(document.getElementById('plan').classList.contains('active')) { renderCalendar(); renderPlan(); }
             if(document.getElementById('presets').classList.contains('active')) renderPresets();
             if(document.getElementById('stats').classList.contains('active')) renderStats();
             if(document.getElementById('random').classList.contains('active')) updateWheelUI();
