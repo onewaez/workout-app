@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout Liquid Glass V2</title>
+    <title>Workout Liquid Glass Ultimate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -29,13 +29,11 @@
         .page { display: none; animation: fadeIn 0.3s ease; } .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Иконки и Nav Bar */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 32, 39, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-around; align-items: center; height: 70px; padding-bottom: env(safe-area-inset-bottom); z-index: 2000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-hint); font-size: 11px; font-weight: 500; cursor: pointer; transition: 0.3s; fill: var(--text-hint); stroke: var(--text-hint); }
         .nav-item.active { color: var(--accent); fill: var(--accent); stroke: var(--accent); transform: scale(1.05); }
         .nav-icon { width: 24px; height: 24px; margin-bottom: 4px; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 
-        /* Календарь (Мини) */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .cal-day { text-align: center; padding: 8px 0; font-size: 14px; border-radius: 10px; cursor: pointer; background: rgba(255,255,255,0.05); position: relative; }
@@ -43,7 +41,6 @@
         .cal-day .dot { width: 4px; height: 4px; background: var(--accent); border-radius: 50%; margin: 2px auto 0; }
         .cal-day.selected .dot { background: #000; }
 
-        /* Элементы Списков */
         .row-between { display: flex; justify-content: space-between; align-items: center; }
         .set-row { background: rgba(0,0,0,0.15); padding: 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .check-box { width: 24px; height: 24px; border: 2px solid var(--accent); border-radius: 50%; transition: 0.3s; }
@@ -52,17 +49,33 @@
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; overflow-y: auto; }
         
-        /* Тепловая карта */
-        .heatmap-container { display: flex; justify-content: center; margin: 10px 0; position: relative; height: 250px; }
-        .heatmap-svg { height: 100%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
-        .muscle-path { fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.3); stroke-width: 1.5; transition: fill 0.5s, filter 0.5s; }
+        .heatmap-container { display: flex; justify-content: center; margin: 10px 0; position: relative; height: 350px; overflow: hidden; }
+        .heatmap-container svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
         
         .gender-toggle { display: flex; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 3px; width: fit-content; margin: 0 auto; }
         .gender-btn { padding: 5px 15px; border-radius: 12px; font-size: 14px; cursor: pointer; transition: 0.3s; }
         .gender-btn.active { background: var(--accent); color: #000; font-weight: bold; }
+
+        /* Таймер отдыха */
+        #rest-timer {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 32, 39, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--accent);
+            padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4); transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 4000;
+        }
+        #rest-timer.visible { top: 20px; }
+        #timer-time { font-size: 24px; font-weight: bold; color: var(--accent); font-variant-numeric: tabular-nums; }
+        .timer-btn { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
+
+    <div id="rest-timer">
+        <span>⏱ Отдых:</span>
+        <span id="timer-time">01:30</span>
+        <button class="timer-btn" onclick="stopTimer()">✖</button>
+    </div>
 
     <div id="home" class="page active">
         <div class="row-between" style="padding: 20px 15px 0;">
@@ -77,7 +90,8 @@
         </div>
 
         <div class="heatmap-container" id="heatmap-wrapper">
-            </div>
+            <p style="color: var(--text-hint); text-align: center; margin-top: 50px;">Загрузка анатомии...</p>
+        </div>
 
         <div class="glass-card">
             <h3>Калькулятор 1ПМ</h3>
@@ -208,6 +222,7 @@
         };
         MUSCLES.forEach(m => { if(!state.wheelLib[m]) state.wheelLib[m] = []; });
         let tempSets = [], editContext = { type: null, targetId: null }, chartInstance = null, currentRotation = 0;
+        let timerInterval = null, isSvgLoaded = false;
 
         window.onload = () => {
             document.getElementById('stat-date').value = state.selectedDate;
@@ -221,11 +236,11 @@
 
             tg.CloudStorage.getItem('gymUltimate', (err, val) => {
                 if(!err && val) { state = {...state, ...JSON.parse(val)}; state.curMonth = new Date(state.selectedDate); }
-                setGender(state.gender); // Вызовет renderAll
+                setGender(state.gender); 
             });
         };
 
-        function save() { tg.CloudStorage.setItem('gymUltimate', JSON.stringify(state)); renderHeatmap(); }
+        function save() { tg.CloudStorage.setItem('gymUltimate', JSON.stringify(state)); applyMuscleColors(); }
 
         function nav(pageId, el = null) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -234,19 +249,43 @@
             renderAll();
         }
 
-        // ================= ТЕПЛОВАЯ КАРТА И ПОЛ =================
+        // ================= ЗАГРУЗКА И ПОКРАСКА ТВОЕГО SVG =================
+        async function loadSVG(gender) {
+            // Если у тебя два файла, назови женский "Muscular_systemREADY_female.svg"
+            // Если файл один, код будет грузить "Muscular_systemREADY.svg" для парня.
+            let fileName = gender === 'male' ? 'Muscular_systemREADY.svg' : 'Muscular_systemREADY_female.svg';
+            
+            try {
+                const response = await fetch(fileName);
+                if (!response.ok) throw new Error("Файл не найден");
+                const svgText = await response.text();
+                document.getElementById('heatmap-wrapper').innerHTML = svgText;
+                isSvgLoaded = true;
+                applyMuscleColors(); // Красим после успешной загрузки
+            } catch (error) {
+                console.error("Ошибка загрузки SVG:", error);
+                // Если файл не найден (например, не загрузил женский), пробуем загрузить дефолтный
+                if(gender === 'female') {
+                    loadSVG('male');
+                } else {
+                    document.getElementById('heatmap-wrapper').innerHTML = `<p style="color:var(--danger); text-align:center; margin-top:50px;">Файл <b>${fileName}</b> не найден.<br>Убедись, что он лежит в папке на GitHub.</p>`;
+                }
+            }
+        }
+
         function setGender(g) {
             state.gender = g; save();
             document.getElementById('btn-male').classList.toggle('active', g === 'male');
             document.getElementById('btn-female').classList.toggle('active', g === 'female');
-            renderHeatmap();
+            loadSVG(g);
         }
 
-        function renderHeatmap() {
+        function applyMuscleColors() {
+            if (!isSvgLoaded) return; // Ждем, пока файл загрузится
+            
             const today = new Date(); today.setHours(0,0,0,0);
             let fatigue = { "Грудь": 99, "Плечи": 99, "Бицепс": 99, "Трицепс": 99, "Трапеция": 99, "Спина": 99, "Ноги": 99 };
             
-            // Анализируем тренировки
             Object.keys(state.workouts).forEach(dateStr => {
                 const wDate = new Date(dateStr); wDate.setHours(0,0,0,0);
                 const diffDays = Math.floor((today - wDate) / (1000 * 60 * 60 * 24));
@@ -258,38 +297,63 @@
             });
 
             const getColor = (days) => {
-                if(days === 0) return { fill: 'rgba(255, 75, 75, 0.8)', glow: 'drop-shadow(0 0 8px #ff4b4b)' }; // Красный
-                if(days === 1) return { fill: 'rgba(255, 149, 0, 0.8)', glow: 'drop-shadow(0 0 6px #ff9500)' }; // Оранжевый
-                if(days === 2) return { fill: 'rgba(255, 214, 10, 0.7)', glow: 'drop-shadow(0 0 5px #ffd60a)' }; // Желтый
-                if(days === 3) return { fill: 'rgba(52, 199, 89, 0.6)', glow: 'drop-shadow(0 0 4px #34c759)' }; // Зеленый
-                return { fill: 'rgba(255,255,255,0.05)', glow: 'none' };
+                if(days === 0) return 'rgba(255, 75, 75, 0.8)'; // Сегодня - красная
+                if(days === 1) return 'rgba(255, 149, 0, 0.8)'; // Оранжевая
+                if(days === 2) return 'rgba(255, 214, 10, 0.7)'; // Желтая
+                if(days === 3) return 'rgba(52, 199, 89, 0.6)'; // Зеленая
+                return 'rgba(255,255,255,0.1)'; // Прозрачная
             };
 
-            // Стилизованные прозрачные SVG силуэты 
-            const isMale = state.gender === 'male';
-            const svgBody = isMale ? 
-                `<path d="M85 40 Q100 20 115 40 L130 90 L110 160 L115 250 L95 250 L100 160 L85 160 L90 250 L70 250 L75 160 L55 90 Z" fill="none" stroke="rgba(255,255,255,0.2)"/>` : 
-                `<path d="M90 40 Q100 25 110 40 L125 90 L105 140 Q120 170 115 250 L95 250 L100 150 L85 150 L90 250 L70 250 Q65 170 80 140 L60 90 Z" fill="none" stroke="rgba(255,255,255,0.2)"/>`;
-
-            const mPaths = {
-                "Трапеция": `<path d="M85 40 Q100 30 115 40 L120 50 L80 50 Z" class="muscle-path"/>`,
-                "Плечи": `<circle cx="58" cy="65" r="12" class="muscle-path"/><circle cx="127" cy="65" r="12" class="muscle-path"/>`,
-                "Грудь": `<path d="M75 55 Q100 55 100 75 Q75 75 75 55 M125 55 Q100 55 100 75 Q125 75 125 55" class="muscle-path"/>`,
-                "Спина": `<path d="M70 75 L100 120 L130 75 Z" class="muscle-path"/>`,
-                "Бицепс": `<ellipse cx="52" cy="95" rx="8" ry="15" class="muscle-path"/><ellipse cx="133" cy="95" rx="8" ry="15" class="muscle-path"/>`,
-                "Трицепс": `<path d="M42 85 Q40 100 48 110 L52 85 Z" class="muscle-path"/><path d="M143 85 Q145 100 137 110 L133 85 Z" class="muscle-path"/>`,
-                "Ноги": `<path d="M75 160 L95 160 L90 240 L70 240 Z" class="muscle-path"/><path d="M110 160 L105 240 L125 240 L115 160 Z" class="muscle-path"/>`
+            // Связь названий мышц с ID в твоем SVG файле
+            const mapping = {
+                "Грудь": "muscle-chest",
+                "Плечи": "muscle-shoulders",
+                "Бицепс": "muscle-biceps",
+                "Трицепс": "muscle-triceps", // Если этого ID нет, код просто пропустит его
+                "Трапеция": "muscle-traps",
+                "Спина": "muscle-back",
+                "Ноги": "muscle-legs"
             };
 
-            let svgContent = `<svg viewBox="30 20 140 240" class="heatmap-svg">${svgBody}`;
-            Object.keys(mPaths).forEach(m => {
-                const c = getColor(fatigue[m]);
-                // Инжектируем стили напрямую в path
-                const styledPath = mPaths[m].replace('class="muscle-path"', `class="muscle-path" style="fill:${c.fill}; filter:${c.glow}"`);
-                svgContent += styledPath;
+            Object.keys(mapping).forEach(muscleName => {
+                const svgPath = document.getElementById(mapping[muscleName]);
+                if (svgPath) {
+                    svgPath.style.fill = getColor(fatigue[muscleName]);
+                    svgPath.style.transition = "fill 0.5s ease"; // Плавное изменение цвета
+                }
             });
-            svgContent += `</svg>`;
-            document.getElementById('heatmap-wrapper').innerHTML = svgContent;
+        }
+
+        // ================= ТАЙМЕР ОТДЫХА =================
+        function startTimer() {
+            stopTimer(); // Сбрасываем старый
+            let timeLeft = 90; // 90 секунд отдыха
+            const timerEl = document.getElementById('rest-timer');
+            const timeText = document.getElementById('timer-time');
+            
+            timerEl.classList.add('visible');
+            
+            const updateUI = () => {
+                const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                const s = (timeLeft % 60).toString().padStart(2, '0');
+                timeText.innerText = `${m}:${s}`;
+            };
+            updateUI();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateUI();
+                if(timeLeft <= 0) {
+                    stopTimer();
+                    tg.HapticFeedback.notificationOccurred('success');
+                    tg.showAlert("Время вышло! Пора делать следующий подход 💪");
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('rest-timer').classList.remove('visible');
         }
 
         // ================= 1ПМ Калькулятор =================
@@ -299,9 +363,7 @@
             if(w && r) {
                 const orm = Math.round(w * (1 + r / 30));
                 document.getElementById('orm-result').innerText = `Твой 1ПМ: ~${orm} кг`;
-            } else {
-                tg.showAlert("Введите вес и количество повторений");
-            }
+            } else { tg.showAlert("Введите вес и количество повторений"); }
         }
 
         // ================= КАЛЕНДАРЬ И ПЛАН =================
@@ -350,7 +412,20 @@
         }
 
         function deleteExFromPlan(idx) { state.workouts[state.selectedDate].splice(idx,1); save(); renderAll(); }
-        function toggleSet(eI, sI) { state.workouts[state.selectedDate][eI].sets[sI].done = !state.workouts[state.selectedDate][eI].sets[sI].done; save(); renderPlan(); tg.HapticFeedback.selectionChanged(); }
+        
+        function toggleSet(eI, sI) { 
+            state.workouts[state.selectedDate][eI].sets[sI].done = !state.workouts[state.selectedDate][eI].sets[sI].done; 
+            save(); 
+            renderPlan(); 
+            tg.HapticFeedback.selectionChanged(); 
+            
+            // Если сет отмечен как выполненный, запускаем таймер
+            if(state.workouts[state.selectedDate][eI].sets[sI].done) {
+                startTimer();
+            } else {
+                stopTimer(); // Если сняли галочку - убираем таймер
+            }
+        }
 
         // ================= ПРЕСЕТЫ =================
         function createPreset() { const n = document.getElementById('preset-name').value; if(n) { state.presets.push({ id: Date.now(), name: n, ex: [] }); document.getElementById('preset-name').value = ''; save(); renderPresets(); } }
@@ -420,7 +495,7 @@
         }
 
         function renderAll() {
-            renderHeatmap();
+            applyMuscleColors();
             if(document.getElementById('plan').classList.contains('active')) { renderCalendar(); renderPlan(); }
             if(document.getElementById('presets').classList.contains('active')) renderPresets();
             if(document.getElementById('stats').classList.contains('active')) renderStats();
