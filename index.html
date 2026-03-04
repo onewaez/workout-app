@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Workout Liquid Glass Ultimate</title>
+    <title>Workout Liquid Glass SVGGlow</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -50,32 +50,15 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; overflow-y: auto; }
         
         .heatmap-container { display: flex; justify-content: center; margin: 10px 0; position: relative; height: 350px; overflow: hidden; }
-        .heatmap-container svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
+        /* Стили для SVG внутри контейнера */
+        .heatmap-container svg { width: 100%; height: 100%; }
         
         .gender-toggle { display: flex; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 3px; width: fit-content; margin: 0 auto; }
         .gender-btn { padding: 5px 15px; border-radius: 12px; font-size: 14px; cursor: pointer; transition: 0.3s; }
         .gender-btn.active { background: var(--accent); color: #000; font-weight: bold; }
-
-        /* Таймер отдыха */
-        #rest-timer {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 32, 39, 0.95); backdrop-filter: blur(15px); border: 1px solid var(--accent);
-            padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4); transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 4000;
-        }
-        #rest-timer.visible { top: 20px; }
-        #timer-time { font-size: 24px; font-weight: bold; color: var(--accent); font-variant-numeric: tabular-nums; }
-        .timer-btn { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
-
-    <div id="rest-timer">
-        <span>⏱ Отдых:</span>
-        <span id="timer-time">01:30</span>
-        <button class="timer-btn" onclick="stopTimer()">✖</button>
-    </div>
 
     <div id="home" class="page active">
         <div class="row-between" style="padding: 20px 15px 0;">
@@ -222,7 +205,7 @@
         };
         MUSCLES.forEach(m => { if(!state.wheelLib[m]) state.wheelLib[m] = []; });
         let tempSets = [], editContext = { type: null, targetId: null }, chartInstance = null, currentRotation = 0;
-        let timerInterval = null, isSvgLoaded = false;
+        let isSvgLoaded = false;
 
         window.onload = () => {
             document.getElementById('stat-date').value = state.selectedDate;
@@ -249,11 +232,10 @@
             renderAll();
         }
 
-        // ================= ЗАГРУЗКА И ПОКРАСКА ТВОЕГО SVG =================
+        // ================= ЗАГРУЗКА И ПОКРАСКА ВАШЕГО SVG С ЭФФЕКТОМ СВЕЧЕНИЯ =================
         async function loadSVG(gender) {
-            // Если у тебя два файла, назови женский "Muscular_systemREADY_female.svg"
-            // Если файл один, код будет грузить "Muscular_systemREADY.svg" для парня.
-            let fileName = gender === 'male' ? 'Muscular_systemREADY.svg' : 'Muscular_systemREADY_female.svg';
+            // Код всегда грузит "Muscular_systemREADY.svg" из вашей папки GitHub
+            let fileName = 'Muscular_systemREADY.svg';
             
             try {
                 const response = await fetch(fileName);
@@ -264,12 +246,7 @@
                 applyMuscleColors(); // Красим после успешной загрузки
             } catch (error) {
                 console.error("Ошибка загрузки SVG:", error);
-                // Если файл не найден (например, не загрузил женский), пробуем загрузить дефолтный
-                if(gender === 'female') {
-                    loadSVG('male');
-                } else {
-                    document.getElementById('heatmap-wrapper').innerHTML = `<p style="color:var(--danger); text-align:center; margin-top:50px;">Файл <b>${fileName}</b> не найден.<br>Убедись, что он лежит в папке на GitHub.</p>`;
-                }
+                document.getElementById('heatmap-wrapper').innerHTML = `<p style="color:var(--danger); text-align:center; margin-top:50px;">Файл <b>${fileName}</b> не найден.<br>Убедись, что он лежит в папке на GitHub.</p>`;
             }
         }
 
@@ -296,20 +273,21 @@
                 }
             });
 
-            const getColor = (days) => {
-                if(days === 0) return 'rgba(255, 75, 75, 0.8)'; // Сегодня - красная
-                if(days === 1) return 'rgba(255, 149, 0, 0.8)'; // Оранжевая
-                if(days === 2) return 'rgba(255, 214, 10, 0.7)'; // Желтая
-                if(days === 3) return 'rgba(52, 199, 89, 0.6)'; // Зеленая
-                return 'rgba(255,255,255,0.1)'; // Прозрачная
+            // Функция возвращает цвет закраски и параметры свечения
+            const getColorStyle = (days) => {
+                if(days === 0) return { fill: 'rgba(255, 75, 75, 0.8)', glow: '0 0 15px rgba(255, 75, 75, 0.9)' }; // Сегодня - красная
+                if(days === 1) return { fill: 'rgba(255, 149, 0, 0.8)', glow: '0 0 12px rgba(255, 149, 0, 0.8)' }; // Оранжевая
+                if(days === 2) return { fill: 'rgba(255, 214, 10, 0.7)', glow: '0 0 10px rgba(255, 214, 10, 0.7)' }; // Желтая
+                if(days === 3) return { fill: 'rgba(52, 199, 89, 0.6)', glow: '0 0 8px rgba(52, 199, 89, 0.6)' }; // Зеленая
+                return { fill: 'rgba(255,255,255,0.1)', glow: 'none' }; // Прозрачная
             };
 
-            // Связь названий мышц с ID в твоем SVG файле
+            // Связь названий мышц с ID в вашем SVG файле
             const mapping = {
                 "Грудь": "muscle-chest",
                 "Плечи": "muscle-shoulders",
                 "Бицепс": "muscle-biceps",
-                "Трицепс": "muscle-triceps", // Если этого ID нет, код просто пропустит его
+                "Трицепс": "muscle-triceps",
                 "Трапеция": "muscle-traps",
                 "Спина": "muscle-back",
                 "Ноги": "muscle-legs"
@@ -318,43 +296,16 @@
             Object.keys(mapping).forEach(muscleName => {
                 const svgPath = document.getElementById(mapping[muscleName]);
                 if (svgPath) {
-                    svgPath.style.fill = getColor(fatigue[muscleName]);
-                    svgPath.style.transition = "fill 0.5s ease"; // Плавное изменение цвета
+                    const style = getColorStyle(fatigue[muscleName]);
+                    svgPath.style.fill = style.fill; // Закраска мышцы
+                    // Добавление эффекта "свечения" через drop-shadow к самому элементу
+                    svgPath.style.filter = style.glow !== 'none' ? `drop-shadow(${style.glow})` : 'none'; 
+                    svgPath.style.transition = "fill 0.5s ease, filter 0.5s ease"; // Плавное изменение
                 }
             });
         }
 
-        // ================= ТАЙМЕР ОТДЫХА =================
-        function startTimer() {
-            stopTimer(); // Сбрасываем старый
-            let timeLeft = 90; // 90 секунд отдыха
-            const timerEl = document.getElementById('rest-timer');
-            const timeText = document.getElementById('timer-time');
-            
-            timerEl.classList.add('visible');
-            
-            const updateUI = () => {
-                const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                const s = (timeLeft % 60).toString().padStart(2, '0');
-                timeText.innerText = `${m}:${s}`;
-            };
-            updateUI();
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateUI();
-                if(timeLeft <= 0) {
-                    stopTimer();
-                    tg.HapticFeedback.notificationOccurred('success');
-                    tg.showAlert("Время вышло! Пора делать следующий подход 💪");
-                }
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-            document.getElementById('rest-timer').classList.remove('visible');
-        }
+        // ================= ТАЙМЕР ОТДЫХА ПОЛНОСТЬЮ УДАЛЕН =================
 
         // ================= 1ПМ Калькулятор =================
         function calculate1RM() {
@@ -418,13 +369,7 @@
             save(); 
             renderPlan(); 
             tg.HapticFeedback.selectionChanged(); 
-            
-            // Если сет отмечен как выполненный, запускаем таймер
-            if(state.workouts[state.selectedDate][eI].sets[sI].done) {
-                startTimer();
-            } else {
-                stopTimer(); // Если сняли галочку - убираем таймер
-            }
+            // Таймер не запускается
         }
 
         // ================= ПРЕСЕТЫ =================
