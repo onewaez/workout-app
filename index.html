@@ -3,213 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LIQUID CORE</title>
+    <title>SLATE | Strength Architecture</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --glass: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --accent: #00f2ff;
-            --accent-glow: rgba(0, 242, 255, 0.3);
-            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            --text: #e0e0e0;
+            --bg: #0f1115;
+            --surface: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #6366f1; /* Indigo */
+            --accent-soft: rgba(99, 102, 241, 0.2);
+            --text: #f4f4f5;
+            --text-dim: #71717a;
+            --safe: #a3e635; /* Sage */
+            --danger: #fb7185; /* Rose */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0; padding: 0; min-height: 100vh;
-            background: var(--bg-gradient); background-attachment: fixed;
-            font-family: 'SF Pro Display', -apple-system, sans-serif;
-            color: var(--text); overflow-x: hidden; padding-bottom: 100px;
+            margin: 0; background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5; padding-bottom: 100px; overflow-x: hidden;
         }
 
-        /* Эффект Liquid Glass */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 20px; margin: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        /* Glassmorphism */
+        .glass {
+            background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px;
         }
 
-        h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 10px 0; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .sub-text { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+        .container { padding: 16px; }
+        h1 { font-size: 26px; font-weight: 700; letter-spacing: -1px; margin: 0; }
+        .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-dim); font-weight: 700; margin-bottom: 8px; display: block; }
 
         /* Кнопки */
         .btn {
-            background: var(--glass); border: 1px solid var(--glass-border);
-            color: #fff; padding: 14px; border-radius: 16px;
-            font-weight: 600; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text);
+            padding: 14px 20px; border-radius: 16px; font-weight: 600; font-size: 15px;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn:active { transform: scale(0.96); background: var(--glass-border); }
-        .btn-accent { background: var(--accent); color: #000; border: none; box-shadow: 0 0 20px var(--accent-glow); }
+        .btn-primary { background: var(--accent); color: white; border: none; box-shadow: 0 4px 15px var(--accent-soft); }
+        .btn:active { transform: scale(0.97); }
 
-        .input-box {
-            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
-            color: #fff; padding: 14px; border-radius: 12px; outline: none; font-size: 16px;
+        .input {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            color: white; padding: 14px; border-radius: 14px; outline: none; font-size: 16px;
         }
+
+        /* Календарь Grid */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-day {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .cal-day.other { color: var(--text-dim); opacity: 0.3; }
+        .cal-day.active { background: var(--accent); color: white; font-weight: 700; }
+        .cal-day.has-w { border-color: var(--accent); color: var(--accent); }
 
         /* Навигация */
-        .nav-bar {
+        .nav {
             position: fixed; bottom: 20px; left: 20px; right: 20px;
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border); height: 70px;
-            border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+            background: rgba(15, 17, 21, 0.8); backdrop-filter: blur(25px);
+            border: 1px solid var(--border); height: 70px; border-radius: 24px;
+            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
         }
-        .nav-btn { color: rgba(255,255,255,0.3); transition: 0.3s; padding: 10px; }
-        .nav-btn.active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
+        .nav-item { color: var(--text-dim); font-size: 10px; font-weight: 700; text-transform: uppercase; text-align: center; }
+        .nav-item.active { color: var(--accent); }
 
-        /* Кольца восстановления */
-        .recovery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .muscle-unit { text-align: center; }
-        .circle-box {
-            position: relative; width: 60px; height: 60px; margin: 0 auto 8px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        svg.progress-ring { transform: rotate(-90deg); width: 60px; height: 60px; }
-        .progress-ring__circle {
-            stroke-dasharray: 157; stroke-dashoffset: 157;
-            transition: stroke-dashoffset 1s ease; stroke-linecap: round;
+        /* Кольца */
+        .rec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .rec-circle {
+            width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--border);
+            margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800;
         }
 
-        /* Цель по весу (Колба) */
-        .goal-container { position: relative; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; overflow: hidden; margin: 15px 0; border: 1px solid var(--glass-border); }
-        .goal-fill { 
-            height: 100%; background: linear-gradient(90deg, var(--accent), #00ff88); 
-            box-shadow: 0 0 15px var(--accent-glow); transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* Модалка */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; overflow-y: auto; }
 
-        /* Календарь */
-        .cal-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .cal-dot { 
-            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            background: var(--glass); border: 1px solid var(--glass-border); font-size: 14px;
-        }
-        .cal-dot.active { background: var(--accent); color: #000; font-weight: bold; }
-        .cal-dot.has-event { border-bottom: 3px solid var(--accent); }
-
-        .page { display: none; animation: pageIn 0.4s ease-out; }
-        .page.active { display: block; }
-        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .modal { 
-            display: none; position: fixed; inset: 0; z-index: 2000; 
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); padding: 20px;
-        }
-
-        .record-badge { background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; }
+        .page { display: none; }
+        .page.active { display: block; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <div class="glass-card">
-            <span class="sub-text">Системный мониторинг</span>
-            <h1>Recovery Status</h1>
-            <div class="recovery-grid" id="recovery-display"></div>
-        </div>
+        <div class="container">
+            <span class="label">Организм</span>
+            <h1>Recovery</h1>
+            <div class="glass" style="padding: 20px; margin-top: 12px;">
+                <div class="rec-grid" id="rec-grid"></div>
+            </div>
 
-        <div class="glass-card">
-            <span class="sub-text">Силовые рекорды</span>
-            <h1 style="margin-bottom:15px">PB Vault</h1>
-            <div id="pb-list"></div>
-            <button class="btn btn-outline" style="width:100%; margin-top:10px" onclick="openModal('pb')">+ Записать рекорд</button>
+            <span class="label" style="margin-top: 24px;">Аналитика веса</span>
+            <div class="glass" style="padding: 20px; margin-top: 12px;">
+                <canvas id="weightChart" style="height: 150px;"></canvas>
+                <div style="display:flex; justify-content:space-between; margin-top:15px">
+                    <h2 id="cur-w" style="margin:0">0 kg</h2>
+                    <span class="label" id="goal-w">Цель: 0 kg</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="train" class="page">
-        <div class="glass-card">
-            <div class="cal-row" id="cal-strip"></div>
-            <h1 id="selected-date-label">Сегодня</h1>
-        </div>
-        
-        <div id="workout-container"></div>
-        
-        <div style="padding: 0 16px;">
-            <button class="btn btn-accent" style="width:100%" onclick="openModal('workout')">Добавить упражнение</button>
-        </div>
+    <div id="plan" class="page">
+        <div class="container">
+            <div class="glass" style="padding: 16px;">
+                <div class="cal-header">
+                    <button class="btn" style="padding: 8px" onclick="shiftMonth(-1)">←</button>
+                    <h2 id="month-label" style="margin:0; font-size: 18px;">Март 2026</h2>
+                    <button class="btn" style="padding: 8px" onclick="shiftMonth(1)">→</button>
+                </div>
+                <div class="cal-grid" id="cal-grid"></div>
+            </div>
 
-        <div class="glass-card" style="margin-top:20px">
-            <span class="sub-text">Генератор нагрузки</span>
-            <select id="rnd-muscle" class="input-box" style="margin: 10px 0" onchange="updateRndList()"></select>
-            <div id="rnd-result" style="font-size: 20px; font-weight: 800; color: var(--accent); text-align: center; margin: 15px 0; min-height: 24px;"></div>
-            <button class="btn btn-outline" style="width:100%" onclick="spinRnd()">Сгенерировать вектор</button>
-            <div id="rnd-config-list" style="margin-top:15px"></div>
-            <input type="text" id="rnd-new-name" class="input-box" placeholder="Новое упражнение" style="margin-top:10px">
-            <button class="btn" style="width:100%; margin-top:5px" onclick="addRndEx()">+ В базу</button>
+            <div style="margin-top: 24px;">
+                <span class="label" id="date-focus">6 Марта</span>
+                <div id="workout-list"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="openModal('add')">+ Упр.</button>
+                    <button class="btn" onclick="openModal('presets')">Пресеты</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="body" class="page">
-        <div class="glass-card">
-            <span class="sub-text">Целевой вес</span>
-            <div style="display:flex; justify-content:space-between; align-items:flex-end">
-                <h1 id="cur-weight-display">0 kg</h1>
-                <span class="sub-text" id="goal-weight-display">Цель: 0 kg</span>
+    <div id="settings" class="page">
+        <div class="container">
+            <h1>Settings</h1>
+            <div class="glass" style="padding: 20px; margin-top: 16px;">
+                <span class="label">Цель по весу</span>
+                <input type="number" id="goal-in" class="input" placeholder="Введите кг" onchange="updateGoal(this.value)">
+                
+                <span class="label" style="margin-top:20px">Добавить вес в лог</span>
+                <div style="display:flex; gap:8px">
+                    <input type="date" id="w-date" class="input">
+                    <input type="number" id="w-val" class="input" placeholder="кг">
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:12px" onclick="saveWeight()">Сохранить вес</button>
             </div>
-            <div class="goal-container"><div id="goal-fill" class="goal-fill"></div></div>
-            <input type="number" id="set-goal" class="input-box" placeholder="Установить цель (кг)" onchange="setGoal(this.value)">
-        </div>
 
-        <div class="glass-card">
-            <span class="sub-text">Лог массы</span>
-            <div style="display:flex; gap:8px; margin:15px 0">
-                <input type="date" id="w-date" class="input-box">
-                <input type="number" id="w-val" class="input-box" placeholder="кг">
+            <div class="glass" style="padding: 20px; margin-top: 16px;">
+                <span class="label">Рекорды</span>
+                <div id="pb-list"></div>
+                <button class="btn" style="width:100%; margin-top:10px" onclick="addPB()">+ Записать рекорд</button>
             </div>
-            <button class="btn btn-accent" style="width:100%" onclick="saveWeight()">Зафиксировать</button>
         </div>
-
-        <canvas id="weightChart" class="glass-card" style="width: calc(100% - 32px); max-height: 200px;"></canvas>
-
-        <div id="weight-history" style="padding: 0 16px"></div>
     </div>
 
     <div id="modal" class="modal">
-        <div class="glass-card" id="modal-content"></div>
+        <div id="modal-body"></div>
     </div>
 
-    <nav class="nav-bar">
-        <div class="nav-btn active" onclick="nav('home', this)">Status</div>
-        <div class="nav-btn" onclick="nav('train', this)">Train</div>
-        <div class="nav-btn" onclick="nav('body', this)">Body</div>
+    <nav class="nav">
+        <div class="nav-item active" onclick="nav('home', this)">Dash</div>
+        <div class="nav-item" onclick="nav('plan', this)">Plan</div>
+        <div class="nav-item" onclick="nav('settings', this)">Settings</div>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        const MUSCLES = ["Грудь", "Спина", "Ноги", "Плечи", "Бицепс", "Трицепс", "Пресс"];
+        const MUSCLES = ["Грудь", "Спина", "Ноги", "Плечи", "Бицепс", "Трицепс"];
         
         let state = {
-            viewDate: new Date().toISOString().split('T')[0],
-            workouts: {}, weightLogs: {}, weightGoal: 0,
-            pbVault: [], 
-            rndData: { "Грудь": ["Жим лежа"], "Спина": ["Подтягивания"], "Ноги": ["Приседания"] }
+            focusDate: new Date().toISOString().split('T')[0],
+            monthDate: new Date(),
+            workouts: {}, presets: [], weightLogs: {}, weightGoal: 0, pbs: []
         };
 
         window.onload = () => {
-            document.getElementById('w-date').value = state.viewDate;
-            MUSCLES.forEach(m => {
-                document.getElementById('rnd-muscle').innerHTML += `<option value="${m}">${m}</option>`;
-                if(!state.rndData[m]) state.rndData[m] = [];
-            });
-            tg.CloudStorage.getItem('liquidState', (err, val) => {
+            document.getElementById('w-date').value = state.focusDate;
+            tg.CloudStorage.getItem('slateState', (err, val) => {
                 if(!err && val) state = {...state, ...JSON.parse(val)};
+                state.monthDate = new Date(); // Сброс на текущий месяц
                 renderAll();
             });
         };
 
-        function save() { tg.CloudStorage.setItem('liquidState', JSON.stringify(state)); renderAll(); }
+        function save() { tg.CloudStorage.setItem('slateState', JSON.stringify(state)); renderAll(); }
 
-        // --- RECOVERY LOGIC ---
-        function renderRecovery() {
-            const container = document.getElementById('recovery-display');
-            container.innerHTML = '';
+        // --- КАЛЕНДАРЬ ---
+        function shiftMonth(dir) { state.monthDate.setMonth(state.monthDate.getMonth() + dir); renderCal(); }
+        function renderCal() {
+            const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+            const m = state.monthDate.getMonth(), y = state.monthDate.getFullYear();
+            document.getElementById('month-label').innerText = new Intl.DateTimeFormat('ru', {month:'long', year:'numeric'}).format(state.monthDate);
+            
+            let firstDay = new Date(y, m, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
+            let lastDate = new Date(y, m + 1, 0).getDate();
+            let prevLastDate = new Date(y, m, 0).getDate();
+
+            for(let i=firstDay; i>0; i--) {
+                grid.innerHTML += `<div class="cal-day other">${prevLastDate-i+1}</div>`;
+            }
+            for(let d=1; d<=lastDate; d++) {
+                let dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                let hasW = state.workouts[dStr]?.length;
+                grid.innerHTML += `<div class="cal-day ${dStr === state.focusDate ? 'active' : ''} ${hasW ? 'has-w' : ''}" onclick="state.focusDate='${dStr}'; save();">${d}</div>`;
+            }
+            document.getElementById('date-focus').innerText = state.focusDate;
+        }
+
+        // --- ВОССТАНОВЛЕНИЕ ---
+        function renderRec() {
+            const grid = document.getElementById('rec-grid'); grid.innerHTML = '';
             const today = new Date(); today.setHours(0,0,0,0);
-
             MUSCLES.forEach(m => {
                 let lastDays = 99;
                 for(let d in state.workouts) {
@@ -219,153 +221,118 @@
                     }
                 }
                 let pct = lastDays >= 3 ? 100 : (lastDays === 2 ? 66 : (lastDays === 1 ? 33 : 0));
-                let offset = 157 - (157 * pct / 100);
-                let color = pct > 66 ? '#00ff88' : (pct > 30 ? '#ffaa00' : '#ff3366');
-
-                container.innerHTML += `
-                    <div class="muscle-unit">
-                        <div class="circle-box">
-                            <svg class="progress-ring"><circle class="progress-ring__circle" stroke="${color}" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" style="stroke-dashoffset: ${offset}"/></svg>
-                            <span style="position:absolute; font-size:12px; font-weight:bold">${pct}%</span>
-                        </div>
-                        <span style="font-size:10px; opacity:0.6; text-transform:uppercase">${m}</span>
+                let color = pct > 60 ? 'var(--safe)' : (pct > 30 ? 'orange' : 'var(--danger)');
+                grid.innerHTML += `
+                    <div style="text-align:center">
+                        <div class="rec-circle" style="border-color: ${color}; color: ${color}">${pct}%</div>
+                        <span style="font-size:9px; color:var(--text-dim); text-transform:uppercase">${m}</span>
                     </div>`;
             });
         }
 
-        // --- TRAIN LOGIC ---
-        function renderTrain() {
-            const strip = document.getElementById('cal-strip'); strip.innerHTML = '';
-            const today = new Date();
-            for(let i=-3; i<=3; i++) {
-                let d = new Date(); d.setDate(today.getDate() + i);
-                let dStr = d.toISOString().split('T')[0];
-                strip.innerHTML += `<div class="cal-dot ${dStr === state.viewDate ? 'active' : ''} ${state.workouts[dStr]?.length ? 'has-event' : ''}" onclick="state.viewDate='${dStr}'; save();">${d.getDate()}</div>`;
-            }
-            document.getElementById('selected-date-label').innerText = state.viewDate === today.toISOString().split('T')[0] ? "Сегодня" : state.viewDate;
-
-            const list = state.workouts[state.viewDate] || [];
-            document.getElementById('workout-container').innerHTML = list.map((ex, i) => `
-                <div class="glass-card">
-                    <div style="display:flex; justify-content:space-between">
-                        <div><span class="sub-text">${ex.muscle}</span><h1>${ex.name}</h1></div>
-                        <span onclick="state.workouts['${state.viewDate}'].splice(${i},1); save();">✕</span>
-                    </div>
-                    ${ex.sets.map(s => `<div style="margin-top:8px; font-family:monospace">${s.w}kg × ${s.r}</div>`).join('')}
-                </div>`).join('');
-        }
-
-        // --- BODY LOGIC ---
-        function setGoal(v) { state.weightGoal = parseFloat(v); save(); }
-        function saveWeight() {
-            const d = document.getElementById('w-date').value;
-            const v = parseFloat(document.getElementById('w-val').value);
-            if(d && v) { state.weightLogs[d] = v; save(); }
-        }
-        function renderBody() {
-            const logs = Object.keys(state.weightLogs).sort();
-            const lastW = state.weightLogs[logs[logs.length-1]] || 0;
-            document.getElementById('cur-weight-display').innerText = lastW + " kg";
-            document.getElementById('goal-weight-display').innerText = "Цель: " + state.weightGoal + " kg";
-            
-            if(state.weightGoal > 0) {
-                let p = (lastW / state.weightGoal) * 100;
-                document.getElementById('goal-fill').style.width = Math.min(p, 100) + "%";
-            }
-
-            document.getElementById('weight-history').innerHTML = Object.keys(state.weightLogs).sort().reverse().map(d => `
-                <div class="glass-card" style="display:flex; justify-content:space-between; margin: 0 0 10px 0; padding:15px">
-                    <span>${d}</span><b>${state.weightLogs[d]} kg</b>
-                    <span style="color:#ff3366" onclick="delete state.weightLogs['${d}']; save();">✕</span>
-                </div>`).join('');
-
-            renderChart(logs);
-        }
-
-        let chartInst = null;
-        function renderChart(labels) {
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            if(chartInst) chartInst.destroy();
-            chartInst = new Chart(ctx, {
-                type: 'line',
-                data: { labels, datasets: [{ data: labels.map(l => state.weightLogs[l]), borderColor: '#00f2ff', tension: 0.4, borderShadowBlur: 10 }] },
-                options: { plugins: { legend: {display: false} }, scales: { y: { display: false }, x: { ticks: {color: 'rgba(255,255,255,0.3)'} } } }
-            });
-        }
-
-        // --- RANDOMIZER ---
-        function updateRndList() {
-            const m = document.getElementById('rnd-muscle').value;
-            document.getElementById('rnd-config-list').innerHTML = (state.rndData[m] || []).map((ex, i) => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px">
-                    <span>${ex}</span><span style="color:#ff3366" onclick="state.rndData['${m}'].splice(${i},1); save();">✕</span>
-                </div>`).join('');
-        }
-        function addRndEx() {
-            const m = document.getElementById('rnd-muscle').value;
-            const n = document.getElementById('rnd-new-name').value;
-            if(n) { state.rndData[m].push(n); document.getElementById('rnd-new-name').value = ''; save(); }
-        }
-        function spinRnd() {
-            const m = document.getElementById('rnd-muscle').value;
-            const items = state.rndData[m];
-            if(!items?.length) return;
-            tg.HapticFeedback.impactOccurred('medium');
-            let i = 0;
-            let timer = setInterval(() => {
-                document.getElementById('rnd-result').innerText = items[Math.floor(Math.random()*items.length)];
-                if(i++ > 10) clearInterval(timer);
-            }, 50);
-        }
-
-        // --- MODALS ---
-        function openModal(type) {
-            const cont = document.getElementById('modal-content');
-            if(type === 'workout') {
-                cont.innerHTML = `<h1>Упражнение</h1>
-                    <select id="m-m" class="input-box">${MUSCLES.map(m => `<option>${m}</option>`).join('')}</select>
-                    <input type="text" id="m-n" class="input-box" placeholder="Название" style="margin:10px 0">
-                    <div id="m-sets"></div>
-                    <button class="btn" style="width:100%" onclick="addMSet()">+ Подход</button>
-                    <button class="btn btn-accent" style="width:100%; margin-top:15px" onclick="saveEx()">Добавить</button>
-                    <button class="btn" style="width:100%; margin-top:10px" onclick="closeModal()">Отмена</button>`;
-            } else if(type === 'pb') {
-                cont.innerHTML = `<h1>Новый рекорд</h1>
-                    <input type="text" id="pb-n" class="input-box" placeholder="Упражнение">
-                    <input type="number" id="pb-w" class="input-box" placeholder="Вес (кг)" style="margin:10px 0">
-                    <button class="btn btn-accent" style="width:100%" onclick="savePB()">Записать в историю</button>
-                    <button class="btn" style="width:100%; margin-top:10px" onclick="closeModal()">Закрыть</button>`;
-            }
+        // --- ПРЕСЕТЫ И ТРЕНИРОВКИ ---
+        function openModal(mode) {
+            const body = document.getElementById('modal-body');
             document.getElementById('modal').style.display = 'block';
+            if(mode === 'add') {
+                body.innerHTML = `
+                    <div class="glass" style="padding:20px">
+                        <h2>Добавить</h2>
+                        <select id="m-m" class="input" style="margin-bottom:10px">${MUSCLES.map(m => `<option>${m}</option>`).join('')}</select>
+                        <input type="text" id="m-n" class="input" placeholder="Упражнение">
+                        <div id="m-sets" style="margin:15px 0"></div>
+                        <button class="btn" style="width:100%" onclick="addSetField()">+ Подход</button>
+                        <button class="btn btn-primary" style="width:100%; margin-top:10px" onclick="saveEx()">В план</button>
+                        <button class="btn" style="width:100%; margin-top:8px" onclick="closeModal()">Отмена</button>
+                    </div>`;
+            } else if(mode === 'presets') {
+                body.innerHTML = `
+                    <div class="glass" style="padding:20px">
+                        <h2>Пресеты</h2>
+                        <input type="text" id="pre-n" class="input" placeholder="Название (н-р: Спина)">
+                        <button class="btn btn-primary" style="width:100%; margin:10px 0" onclick="createPreset()">Создать из плана дня</button>
+                        <div id="pre-list"></div>
+                        <button class="btn" style="width:100%; margin-top:10px" onclick="closeModal()">Закрыть</button>
+                    </div>`;
+                renderPresetList();
+            }
         }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function addMSet() { document.getElementById('m-sets').innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px"><input type="number" class="input-box sw" placeholder="кг"><input type="number" class="input-box sr" placeholder="раз"></div>`; }
+        function addSetField() { document.getElementById('m-sets').innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px"><input type="number" class="input sw" placeholder="кг"><input type="number" class="input sr" placeholder="раз"></div>`; }
+        
         function saveEx() {
             const muscle = document.getElementById('m-m').value;
             const name = document.getElementById('m-n').value;
             const sets = Array.from(document.querySelectorAll('#m-sets > div')).map(d => ({ w: d.querySelector('.sw').value, r: d.querySelector('.sr').value }));
-            if(!state.workouts[state.viewDate]) state.workouts[state.viewDate] = [];
-            state.workouts[state.viewDate].push({ muscle, name, sets });
+            if(!state.workouts[state.focusDate]) state.workouts[state.focusDate] = [];
+            state.workouts[state.focusDate].push({ muscle, name, sets });
             save(); closeModal();
         }
-        function savePB() {
-            const name = document.getElementById('pb-n').value;
-            const weight = document.getElementById('pb-w').value;
-            if(name && weight) { state.pbVault.push({ name, weight, date: new Date().toLocaleDateString() }); save(); closeModal(); }
+
+        function createPreset() {
+            const name = document.getElementById('pre-n').value;
+            const currentWorkouts = state.workouts[state.focusDate] || [];
+            if(name && currentWorkouts.length) {
+                state.presets.push({ id: Date.now(), name, exercises: JSON.parse(JSON.stringify(currentWorkouts)) });
+                save(); renderPresetList();
+            }
+        }
+        function renderPresetList() {
+            document.getElementById('pre-list').innerHTML = state.presets.map(p => `
+                <div class="glass" style="padding:15px; margin-top:10px; display:flex; justify-content:space-between; align-items:center">
+                    <div><b>${p.name}</b><br><small>${p.exercises.length} упр.</small></div>
+                    <div style="display:flex; gap:5px">
+                        <button class="btn btn-primary" style="padding:8px 12px" onclick="applyPreset(${p.id})">Применить</button>
+                        <button class="btn" style="padding:8px" onclick="deletePreset(${p.id})">✕</button>
+                    </div>
+                </div>`).join('');
+        }
+        function applyPreset(id) {
+            const p = state.presets.find(x => x.id === id);
+            if(!state.workouts[state.focusDate]) state.workouts[state.focusDate] = [];
+            state.workouts[state.focusDate].push(...JSON.parse(JSON.stringify(p.exercises)));
+            save(); closeModal();
+        }
+        function deletePreset(id) { state.presets = state.presets.filter(x => x.id !== id); save(); renderPresetList(); }
+
+        // --- ВЕС ---
+        function updateGoal(v) { state.weightGoal = v; save(); }
+        function saveWeight() {
+            const d = document.getElementById('w-date').value, v = document.getElementById('w-val').value;
+            if(d && v) { state.weightLogs[d] = v; save(); }
+        }
+        
+        let chart;
+        function renderChart() {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(chart) chart.destroy();
+            const keys = Object.keys(state.weightLogs).sort();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: keys, datasets: [{ data: keys.map(k => state.weightLogs[k]), borderColor: '#6366f1', tension: 0.4, fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)' }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { ticks: { color: '#71717a' }, grid: { display: false } } } }
+            });
+            const lastW = state.weightLogs[keys[keys.length-1]] || 0;
+            document.getElementById('cur-w').innerText = lastW + " kg";
+            document.getElementById('goal-w').innerText = "Цель: " + state.weightGoal + " kg";
         }
 
-        // --- CORE UI ---
         function nav(p, el) {
             document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
             document.getElementById(p).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
             el.classList.add('active');
         }
+
         function renderAll() {
-            renderRecovery(); renderTrain(); renderBody(); updateRndList();
-            document.getElementById('pb-list').innerHTML = state.pbVault.slice(-3).reverse().map(p => `
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px">
-                    <span>${p.name}</span><span class="record-badge">${p.weight} KG</span>
+            renderCal(); renderRec(); renderChart();
+            const list = state.workouts[state.focusDate] || [];
+            document.getElementById('workout-list').innerHTML = list.map((ex, i) => `
+                <div class="glass" style="padding:15px; margin-top:10px">
+                    <div style="display:flex; justify-content:space-between">
+                        <b>${ex.name}</b> <span onclick="state.workouts['${state.focusDate}'].splice(${i},1); save();">✕</span>
+                    </div>
+                    <div class="label" style="margin-bottom:0">${ex.muscle}</div>
                 </div>`).join('');
         }
     </script>
