@@ -3,511 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AURA | Athletic OS</title>
+    <title>LIQUID CORE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #000000;          /* Абсолютный черный (OLED) */
-            --surface: #0a0a0c;     /* Почти черный для карточек */
-            --border: #1f1f22;      /* Очень тонкие границы */
-            --text-main: #ffffff;   
-            --text-dim: #8b8b93;    
-            
-            /* Функциональные цвета стартапа */
-            --green: #00ff66;       
-            --red: #ff3333;         
-            --orange: #ffaa00;      
-            --accent: #ffffff;      
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.3);
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --text: #e0e0e0;
         }
 
-        body { 
-            margin: 0; padding: 0; padding-bottom: 100px; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
-            background-color: var(--bg); color: var(--text-main); 
-            -webkit-user-select: none; user-select: none;
-            letter-spacing: -0.3px;
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0; min-height: 100vh;
+            background: var(--bg-gradient); background-attachment: fixed;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            color: var(--text); overflow-x: hidden; padding-bottom: 100px;
         }
 
-        /* Премиум Карточки */
-        .card { 
-            background: var(--surface); border: 1px solid var(--border); 
-            border-radius: 20px; padding: 24px; margin: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+        /* Эффект Liquid Glass */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px; margin: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
-        h1 { font-size: 28px; font-weight: 700; margin: 0 0 5px 0; letter-spacing: -1px; }
-        h2, h3 { margin: 0 0 15px 0; font-weight: 600; }
-        .text-dim { color: var(--text-dim); font-size: 14px; font-weight: 500; }
+        h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 0 0 10px 0; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub-text { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
 
         /* Кнопки */
-        .btn { 
-            background: var(--text-main); color: var(--bg); 
-            border: none; padding: 16px; 
-            border-radius: 14px; width: 100%; font-weight: 700; 
-            font-size: 16px; cursor: pointer; transition: transform 0.2s, opacity 0.2s; 
-            text-transform: uppercase; letter-spacing: 0.5px;
+        .btn {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: #fff; padding: 14px; border-radius: 16px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-green { background: var(--green); color: #000; box-shadow: 0 0 20px rgba(0, 255, 102, 0.2); }
-        .btn-red { background: rgba(255, 51, 51, 0.1); color: var(--red); border: 1px solid var(--red); }
-        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+        .btn:active { transform: scale(0.96); background: var(--glass-border); }
+        .btn-accent { background: var(--accent); color: #000; border: none; box-shadow: 0 0 20px var(--accent-glow); }
 
-        /* Инпуты */
-        .input-box { 
-            width: 100%; background: var(--bg); border: 1px solid var(--border); 
-            color: var(--text-main); padding: 16px; border-radius: 14px; 
-            margin-bottom: 12px; box-sizing: border-box; font-size: 16px; outline: none; 
-            transition: border 0.3s;
+        .input-box {
+            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+            color: #fff; padding: 14px; border-radius: 12px; outline: none; font-size: 16px;
         }
-        .input-box:focus { border-color: var(--green); }
 
-        /* Навигация (Floating style) */
-        .bottom-nav { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; 
-            background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border); display: flex; 
-            justify-content: space-around; align-items: center; 
-            height: 70px; border-radius: 35px; z-index: 2000; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+        /* Навигация */
+        .nav-bar {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); height: 70px;
+            border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); cursor: pointer; transition: 0.3s ease; padding: 10px; }
-        .nav-item.active { color: var(--text-main); transform: translateY(-3px); }
-        .nav-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; }
+        .nav-btn { color: rgba(255,255,255,0.3); transition: 0.3s; padding: 10px; }
+        .nav-btn.active { color: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
 
-        /* === БИОМЕТРИЧЕСКИЕ КОЛЬЦА (Вместо SVG) === */
-        .bio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-        .bio-card { 
-            background: var(--bg); border: 1px solid var(--border); 
-            border-radius: 16px; padding: 16px; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
+        /* Кольца восстановления */
+        .recovery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .muscle-unit { text-align: center; }
+        .circle-box {
+            position: relative; width: 60px; height: 60px; margin: 0 auto 8px;
+            display: flex; align-items: center; justify-content: center;
         }
-        
-        /* Само кольцо на CSS */
-        .ring-container { 
-            position: relative; width: 70px; height: 70px; 
-            border-radius: 50%; margin-bottom: 12px;
-            /* Градиент формируется через JS */
-            background: conic-gradient(var(--green) 100%, #1a1a1a 0);
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        svg.progress-ring { transform: rotate(-90deg); width: 60px; height: 60px; }
+        .progress-ring__circle {
+            stroke-dasharray: 157; stroke-dashoffset: 157;
+            transition: stroke-dashoffset 1s ease; stroke-linecap: round;
         }
-        .ring-inner { 
-            position: absolute; width: 58px; height: 58px; 
-            background: var(--bg); border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center;
-            font-weight: 700; font-size: 16px;
+
+        /* Цель по весу (Колба) */
+        .goal-container { position: relative; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; overflow: hidden; margin: 15px 0; border: 1px solid var(--glass-border); }
+        .goal-fill { 
+            height: 100%; background: linear-gradient(90deg, var(--accent), #00ff88); 
+            box-shadow: 0 0 15px var(--accent-glow); transition: 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .muscle-name { font-weight: 600; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .muscle-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; }
-        
-        .status-optimal { color: var(--green); background: rgba(0,255,102,0.1); }
-        .status-recovering { color: var(--orange); background: rgba(255,170,0,0.1); }
-        .status-fatigued { color: var(--red); background: rgba(255,51,51,0.1); box-shadow: 0 0 15px rgba(255,51,51,0.2); }
 
-        /* Списки и Календарь */
-        .row-between { display: flex; justify-content: space-between; align-items: center; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 18px; font-weight: 700; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .cal-day { 
-            text-align: center; padding: 14px 0; border-radius: 12px; 
-            background: var(--surface); font-size: 16px; font-weight: 600; cursor: pointer; 
-            border: 1px solid var(--border); color: var(--text-dim);
+        /* Календарь */
+        .cal-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .cal-dot { 
+            width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            background: var(--glass); border: 1px solid var(--glass-border); font-size: 14px;
         }
-        .cal-day.selected { border-color: var(--text-main); background: var(--text-main); color: var(--bg); }
-        .cal-day.has-workout::after { content: ''; display: block; width: 6px; height: 6px; background: var(--green); border-radius: 50%; margin: 4px auto 0; box-shadow: 0 0 8px var(--green); }
-        .cal-day.selected.has-workout::after { background: var(--bg); box-shadow: none; }
+        .cal-dot.active { background: var(--accent); color: #000; font-weight: bold; }
+        .cal-dot.has-event { border-bottom: 3px solid var(--accent); }
 
-        .workout-card { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: 16px; margin-bottom: 12px; }
-        .set-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
-        .set-row:last-child { border-bottom: none; padding-bottom: 0; }
-        
-        .check-box { width: 28px; height: 28px; border: 2px solid var(--border); border-radius: 8px; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
-        .check-box.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 15px rgba(0,255,102,0.3); }
-        .check-box.done::after { content: "✓"; color: #000; font-weight: 800; }
+        .page { display: none; animation: pageIn 0.4s ease-out; }
+        .page.active { display: block; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .del-btn { color: var(--red); font-weight: bold; font-size: 18px; padding: 5px; cursor: pointer; }
+        .modal { 
+            display: none; position: fixed; inset: 0; z-index: 2000; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); padding: 20px;
+        }
 
-        /* Страницы и Модалки */
-        .page { display: none; padding-top: 20px; } 
-        .page.active { display: block; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.2, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; overflow-y: auto; padding-top: 40px; }
+        .record-badge { background: rgba(255, 215, 0, 0.1); border: 1px solid gold; color: gold; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <div style="padding: 0 20px;">
-            <p class="text-dim" style="text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px;">AURA OS v2.0</p>
-            <h1>Статус системы</h1>
-            
-            <div class="bio-grid" id="bio-dashboard">
-                </div>
+        <div class="glass-card">
+            <span class="sub-text">Системный мониторинг</span>
+            <h1>Recovery Status</h1>
+            <div class="recovery-grid" id="recovery-display"></div>
         </div>
 
-        <div class="card" style="margin-top: 30px;">
-            <h3>Анализ 1ПМ</h3>
-            <div style="display: flex; gap: 10px;">
-                <input type="number" id="orm-w" class="input-box" placeholder="Масса (кг)" inputmode="decimal">
-                <input type="number" id="orm-r" class="input-box" placeholder="Повторения" inputmode="numeric">
-            </div>
-            <button class="btn btn-outline" onclick="calcRM()">Анализировать</button>
-            <h2 id="rm-res" style="text-align: center; margin-top: 20px; color: var(--green); font-size: 32px; display: none;"></h2>
+        <div class="glass-card">
+            <span class="sub-text">Силовые рекорды</span>
+            <h1 style="margin-bottom:15px">PB Vault</h1>
+            <div id="pb-list"></div>
+            <button class="btn btn-outline" style="width:100%; margin-top:10px" onclick="openModal('pb')">+ Записать рекорд</button>
         </div>
     </div>
 
-    <div id="plan" class="page">
-        <div style="padding: 0 20px;">
-            <div class="cal-header">
-                <span onclick="shiftMonth(-1)" style="cursor:pointer; padding:10px;">←</span>
-                <span id="month-label">Месяц</span>
-                <span onclick="shiftMonth(1)" style="cursor:pointer; padding:10px;">→</span>
-            </div>
-            <div id="calendar" class="cal-grid"></div>
+    <div id="train" class="page">
+        <div class="glass-card">
+            <div class="cal-row" id="cal-strip"></div>
+            <h1 id="selected-date-label">Сегодня</h1>
         </div>
         
-        <div class="card" style="margin-top: 20px;">
-            <div class="row-between" style="margin-bottom: 20px;">
-                <h2 id="date-label" style="margin:0;">Протокол</h2>
-                <span class="text-dim" style="cursor:pointer; text-decoration: underline;" onclick="nav('presets')">Шаблоны</span>
+        <div id="workout-container"></div>
+        
+        <div style="padding: 0 16px;">
+            <button class="btn btn-accent" style="width:100%" onclick="openModal('workout')">Добавить упражнение</button>
+        </div>
+
+        <div class="glass-card" style="margin-top:20px">
+            <span class="sub-text">Генератор нагрузки</span>
+            <select id="rnd-muscle" class="input-box" style="margin: 10px 0" onchange="updateRndList()"></select>
+            <div id="rnd-result" style="font-size: 20px; font-weight: 800; color: var(--accent); text-align: center; margin: 15px 0; min-height: 24px;"></div>
+            <button class="btn btn-outline" style="width:100%" onclick="spinRnd()">Сгенерировать вектор</button>
+            <div id="rnd-config-list" style="margin-top:15px"></div>
+            <input type="text" id="rnd-new-name" class="input-box" placeholder="Новое упражнение" style="margin-top:10px">
+            <button class="btn" style="width:100%; margin-top:5px" onclick="addRndEx()">+ В базу</button>
+        </div>
+    </div>
+
+    <div id="body" class="page">
+        <div class="glass-card">
+            <span class="sub-text">Целевой вес</span>
+            <div style="display:flex; justify-content:space-between; align-items:flex-end">
+                <h1 id="cur-weight-display">0 kg</h1>
+                <span class="sub-text" id="goal-weight-display">Цель: 0 kg</span>
             </div>
-            <div id="workout-list"></div>
-            <button class="btn btn-green" style="margin-top: 20px;" onclick="openModal('plan')">+ Блок упражнения</button>
+            <div class="goal-container"><div id="goal-fill" class="goal-fill"></div></div>
+            <input type="number" id="set-goal" class="input-box" placeholder="Установить цель (кг)" onchange="setGoal(this.value)">
         </div>
-    </div>
 
-    <div id="presets" class="page">
-        <div class="card">
-            <h2>Архив шаблонов</h2>
-            <input type="text" id="preset-name" class="input-box" placeholder="Идентификатор шаблона">
-            <button class="btn btn-outline" onclick="addPreset()">Сохранить в базу</button>
-        </div>
-        <div id="presets-list" style="padding: 0 16px;"></div>
-    </div>
-
-    <div id="stats" class="page">
-        <div class="card">
-            <h2>Масса тела</h2>
-            <canvas id="chartCanvas" style="margin-bottom: 25px;"></canvas>
-            <input type="number" id="stat-w" class="input-box" placeholder="Фиксация массы (кг)" inputmode="decimal">
-            <button class="btn btn-green" onclick="addWeight()">Записать данные</button>
-        </div>
-        <div class="card">
-            <h3 class="text-dim" style="text-transform: uppercase;">Лог изменений</h3>
-            <div id="weight-history"></div>
-        </div>
-    </div>
-
-    <div id="random" class="page">
-        <div class="card" style="text-align: center;">
-            <h2>Вектор нагрузки</h2>
-            <p class="text-dim">Случайная генерация паттерна</p>
-            <select id="wheel-m" class="input-box" onchange="drawWheel()"></select>
-            
-            <div style="position: relative; width: 280px; height: 280px; margin: 40px auto;">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid var(--text-main); z-index: 10;"></div>
-                <canvas id="wheelCanvas" width="280" height="280" style="border-radius: 50%; transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1); box-shadow: 0 0 40px rgba(0,255,102,0.1);"></canvas>
+        <div class="glass-card">
+            <span class="sub-text">Лог массы</span>
+            <div style="display:flex; gap:8px; margin:15px 0">
+                <input type="date" id="w-date" class="input-box">
+                <input type="number" id="w-val" class="input-box" placeholder="кг">
             </div>
-            <button class="btn btn-outline" onclick="spinWheel()">Инициализировать спин</button>
+            <button class="btn btn-accent" style="width:100%" onclick="saveWeight()">Зафиксировать</button>
         </div>
-    </div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="nav('home', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        </div>
-        <div class="nav-item" onclick="nav('plan', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div class="nav-item" onclick="nav('stats', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        </div>
-        <div class="nav-item" onclick="nav('random', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-    </nav>
+        <canvas id="weightChart" class="glass-card" style="width: calc(100% - 32px); max-height: 200px;"></canvas>
+
+        <div id="weight-history" style="padding: 0 16px"></div>
+    </div>
 
     <div id="modal" class="modal">
-        <div class="card" style="margin-top: 20px;">
-            <h2>Конфигурация</h2>
-            <select id="m-muscle" class="input-box"></select>
-            <input type="text" id="m-name" class="input-box" placeholder="Паттерн движения (Жим, Тяга...)">
-            
-            <div id="m-sets" style="margin: 20px 0;"></div>
-            <button class="btn btn-outline" style="margin-bottom: 20px;" onclick="addModalSet()">+ Добавить сет</button>
-            
-            <button class="btn btn-green" onclick="saveEx()">Подтвердить</button>
-            <button class="btn btn-red" style="margin-top: 15px;" onclick="closeModal()">Прервать</button>
-        </div>
+        <div class="glass-card" id="modal-content"></div>
     </div>
+
+    <nav class="nav-bar">
+        <div class="nav-btn active" onclick="nav('home', this)">Status</div>
+        <div class="nav-btn" onclick="nav('train', this)">Train</div>
+        <div class="nav-btn" onclick="nav('body', this)">Body</div>
+    </nav>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        
-        // Новая база мышц без привязки к SVG
         const MUSCLES = ["Грудь", "Спина", "Ноги", "Плечи", "Бицепс", "Трицепс", "Пресс"];
-
+        
         let state = {
-            date: new Date().toISOString().split('T')[0],
-            monthDate: new Date(),
-            workouts: {}, presets: [], weights: [],
-            wheelData: { "Грудь": ["Жим лежа", "Брусья"], "Спина": ["Подтягивания", "Тяга в наклоне"], "Ноги": ["Присед", "Выпады"], "Плечи": ["Армейский жим"], "Бицепс": ["ПШБ"], "Трицепс": ["Французский жим"], "Пресс": ["Скручивания"] }
+            viewDate: new Date().toISOString().split('T')[0],
+            workouts: {}, weightLogs: {}, weightGoal: 0,
+            pbVault: [], 
+            rndData: { "Грудь": ["Жим лежа"], "Спина": ["Подтягивания"], "Ноги": ["Приседания"] }
         };
-
-        let tempSets = []; let modalCtx = { type: null, id: null };
-        let wheelRot = 0; let chartInst = null;
 
         window.onload = () => {
+            document.getElementById('w-date').value = state.viewDate;
             MUSCLES.forEach(m => {
-                document.getElementById('m-muscle').innerHTML += `<option value="${m}">${m}</option>`;
-                if(state.wheelData[m]) document.getElementById('wheel-m').innerHTML += `<option value="${m}">${m}</option>`;
+                document.getElementById('rnd-muscle').innerHTML += `<option value="${m}">${m}</option>`;
+                if(!state.rndData[m]) state.rndData[m] = [];
             });
-
-            tg.CloudStorage.getItem('auraOS', (err, val) => {
-                if(!err && val) { state = {...state, ...JSON.parse(val)}; state.monthDate = new Date(); }
-                renderUI();
+            tg.CloudStorage.getItem('liquidState', (err, val) => {
+                if(!err && val) state = {...state, ...JSON.parse(val)};
+                renderAll();
             });
         };
 
-        function save() { tg.CloudStorage.setItem('auraOS', JSON.stringify(state)); updateBioRings(); }
+        function save() { tg.CloudStorage.setItem('liquidState', JSON.stringify(state)); renderAll(); }
 
-        // === ГЛАВНАЯ МАГИЯ: БИОМЕТРИЧЕСКИЕ КОЛЬЦА ВОССТАНОВЛЕНИЯ ===
-        function updateBioRings() {
-            const grid = document.getElementById('bio-dashboard');
-            grid.innerHTML = '';
-            
-            const today = new Date();
-            today.setHours(0,0,0,0);
+        // --- RECOVERY LOGIC ---
+        function renderRecovery() {
+            const container = document.getElementById('recovery-display');
+            container.innerHTML = '';
+            const today = new Date(); today.setHours(0,0,0,0);
 
-            MUSCLES.forEach(muscle => {
-                let recoveryPct = 100; // По умолчанию восстановлен
-                let statusClass = 'status-optimal';
-                let statusText = 'ОПТИМАЛЬНО';
-                let color = 'var(--green)';
-
-                // Ищем когда последний раз тренировали эту мышцу
-                let lastTrainedDaysAgo = 999;
-                
-                // Проходим по всем датам тренировок
-                for (let dateStr in state.workouts) {
-                    const hasMuscle = state.workouts[dateStr].some(ex => ex.muscle === muscle);
-                    if(hasMuscle) {
-                        const wDate = new Date(dateStr);
-                        const diffTime = Math.abs(today - wDate);
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        if(diffDays < lastTrainedDaysAgo) lastTrainedDaysAgo = diffDays;
+            MUSCLES.forEach(m => {
+                let lastDays = 99;
+                for(let d in state.workouts) {
+                    if(state.workouts[d].some(ex => ex.muscle === m)) {
+                        let diff = Math.ceil(Math.abs(today - new Date(d)) / 86400000);
+                        if(diff < lastDays) lastDays = diff;
                     }
                 }
+                let pct = lastDays >= 3 ? 100 : (lastDays === 2 ? 66 : (lastDays === 1 ? 33 : 0));
+                let offset = 157 - (157 * pct / 100);
+                let color = pct > 66 ? '#00ff88' : (pct > 30 ? '#ffaa00' : '#ff3366');
 
-                // Расчет восстановления:
-                if (lastTrainedDaysAgo === 0) {
-                    recoveryPct = 0; // Тренировал сегодня
-                    statusClass = 'status-fatigued';
-                    statusText = 'ИСТОЩЕНО';
-                    color = 'var(--red)';
-                } else if (lastTrainedDaysAgo === 1) {
-                    recoveryPct = 40; // Вчера
-                    statusClass = 'status-recovering';
-                    statusText = 'РЕГЕНЕРАЦИЯ';
-                    color = 'var(--orange)';
-                } else if (lastTrainedDaysAgo === 2) {
-                    recoveryPct = 75; // Позавчера (Почти готов)
-                    statusClass = 'status-optimal';
-                    statusText = 'ГОТОВНОСТЬ';
-                    color = 'var(--green)';
-                }
-
-                // Рисуем карточку
-                grid.innerHTML += `
-                    <div class="bio-card">
-                        <div class="ring-container" style="background: conic-gradient(${color} ${recoveryPct}%, #1a1a1a 0);">
-                            <div class="ring-inner" style="color: ${color}">${recoveryPct}%</div>
+                container.innerHTML += `
+                    <div class="muscle-unit">
+                        <div class="circle-box">
+                            <svg class="progress-ring"><circle class="progress-ring__circle" stroke="${color}" stroke-width="4" fill="transparent" r="25" cx="30" cy="30" style="stroke-dashoffset: ${offset}"/></svg>
+                            <span style="position:absolute; font-size:12px; font-weight:bold">${pct}%</span>
                         </div>
-                        <div class="muscle-name">${muscle}</div>
-                        <div class="muscle-status ${statusClass}">${statusText}</div>
+                        <span style="font-size:10px; opacity:0.6; text-transform:uppercase">${m}</span>
+                    </div>`;
+            });
+        }
+
+        // --- TRAIN LOGIC ---
+        function renderTrain() {
+            const strip = document.getElementById('cal-strip'); strip.innerHTML = '';
+            const today = new Date();
+            for(let i=-3; i<=3; i++) {
+                let d = new Date(); d.setDate(today.getDate() + i);
+                let dStr = d.toISOString().split('T')[0];
+                strip.innerHTML += `<div class="cal-dot ${dStr === state.viewDate ? 'active' : ''} ${state.workouts[dStr]?.length ? 'has-event' : ''}" onclick="state.viewDate='${dStr}'; save();">${d.getDate()}</div>`;
+            }
+            document.getElementById('selected-date-label').innerText = state.viewDate === today.toISOString().split('T')[0] ? "Сегодня" : state.viewDate;
+
+            const list = state.workouts[state.viewDate] || [];
+            document.getElementById('workout-container').innerHTML = list.map((ex, i) => `
+                <div class="glass-card">
+                    <div style="display:flex; justify-content:space-between">
+                        <div><span class="sub-text">${ex.muscle}</span><h1>${ex.name}</h1></div>
+                        <span onclick="state.workouts['${state.viewDate}'].splice(${i},1); save();">✕</span>
                     </div>
-                `;
-            });
+                    ${ex.sets.map(s => `<div style="margin-top:8px; font-family:monospace">${s.w}kg × ${s.r}</div>`).join('')}
+                </div>`).join('');
         }
 
-        // --- НАВИГАЦИЯ ---
-        function nav(page, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-            if(el) {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                el.classList.add('active');
-            }
-            renderUI();
+        // --- BODY LOGIC ---
+        function setGoal(v) { state.weightGoal = parseFloat(v); save(); }
+        function saveWeight() {
+            const d = document.getElementById('w-date').value;
+            const v = parseFloat(document.getElementById('w-val').value);
+            if(d && v) { state.weightLogs[d] = v; save(); }
         }
-
-        // --- ПЛАН И ПОДХОДЫ ---
-        function toggleSet(exI, sI) {
-            state.workouts[state.date][exI].sets[sI].done = !state.workouts[state.date][exI].sets[sI].done;
-            tg.HapticFeedback.selectionChanged();
-            save(); renderPlan();
-        }
-
-        function renderPlan() {
-            const c = document.getElementById('workout-list'); c.innerHTML = '';
-            const list = state.workouts[state.date] || [];
-            if(!list.length) c.innerHTML = "<p class='text-dim' style='text-align:center;'>Нет активных протоколов на сегодня</p>";
+        function renderBody() {
+            const logs = Object.keys(state.weightLogs).sort();
+            const lastW = state.weightLogs[logs[logs.length-1]] || 0;
+            document.getElementById('cur-weight-display').innerText = lastW + " kg";
+            document.getElementById('goal-weight-display').innerText = "Цель: " + state.weightGoal + " kg";
             
-            list.forEach((ex, exI) => {
-                let h = `<div class="workout-card">
-                    <div class="row-between" style="margin-bottom:15px;">
-                        <div>
-                            <span class="text-dim" style="font-size:12px; text-transform:uppercase;">${ex.muscle}</span>
-                            <div style="font-size:18px; font-weight:700;">${ex.name}</div>
-                        </div>
-                        <span class="del-btn" onclick="delEx(${exI})">✕</span>
-                    </div>`;
-                ex.sets.forEach((s, sI) => {
-                    h += `<div class="set-row" onclick="toggleSet(${exI}, ${sI})">
-                        <span style="font-size:18px; font-weight:600; font-family:monospace;">${s.w} <span class="text-dim">kg</span> × ${s.r}</span>
-                        <div class="check-box ${s.done ? 'done' : ''}"></div>
-                    </div>`;
-                });
-                c.innerHTML += h + `</div>`;
-            });
-        }
-        function delEx(i) { state.workouts[state.date].splice(i, 1); save(); renderPlan(); renderCal(); }
-
-        // --- КАЛЕНДАРЬ ---
-        function shiftMonth(dir) { state.monthDate.setMonth(state.monthDate.getMonth() + dir); renderCal(); }
-        function renderCal() {
-            const grid = document.getElementById('calendar'); grid.innerHTML = '';
-            const m = state.monthDate.getMonth(), y = state.monthDate.getFullYear();
-            document.getElementById('month-label').innerText = new Intl.DateTimeFormat('ru', {month:'long', year:'numeric'}).format(state.monthDate);
-            
-            let fd = new Date(y, m, 1).getDay(); fd = fd === 0 ? 6 : fd - 1;
-            let days = new Date(y, m + 1, 0).getDate();
-
-            for(let i=0; i<fd; i++) grid.appendChild(document.createElement('div'));
-            for(let d=1; d<=days; d++) {
-                const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const el = document.createElement('div');
-                let cl = `cal-day`;
-                if(dStr === state.date) cl += ` selected`;
-                if(state.workouts[dStr] && state.workouts[dStr].length > 0) cl += ` has-workout`;
-                
-                el.className = cl;
-                el.innerText = d;
-                el.onclick = () => { state.date = dStr; renderUI(); };
-                grid.appendChild(el);
+            if(state.weightGoal > 0) {
+                let p = (lastW / state.weightGoal) * 100;
+                document.getElementById('goal-fill').style.width = Math.min(p, 100) + "%";
             }
-            document.getElementById('date-label').innerText = `Протокол: ${state.date}`;
+
+            document.getElementById('weight-history').innerHTML = Object.keys(state.weightLogs).sort().reverse().map(d => `
+                <div class="glass-card" style="display:flex; justify-content:space-between; margin: 0 0 10px 0; padding:15px">
+                    <span>${d}</span><b>${state.weightLogs[d]} kg</b>
+                    <span style="color:#ff3366" onclick="delete state.weightLogs['${d}']; save();">✕</span>
+                </div>`).join('');
+
+            renderChart(logs);
         }
 
-        // --- ШАБЛОНЫ ---
-        function addPreset() {
-            const n = document.getElementById('preset-name').value;
-            if(n) { state.presets.push({ id: Date.now(), name: n, ex: [] }); document.getElementById('preset-name').value = ''; save(); renderPresets(); }
-        }
-        function renderPresets() {
-            const c = document.getElementById('presets-list'); c.innerHTML = '';
-            state.presets.forEach((p, i) => {
-                let h = `<div class="workout-card"><h2 style="color:var(--green); text-transform:uppercase;">${p.name}</h2>`;
-                p.ex.forEach(e => h += `<div class="text-dim" style="margin-bottom:8px;">• ${e.name}</div>`);
-                h += `<div style="display:flex; gap:10px; margin-top:20px;">
-                    <button class="btn btn-outline" style="padding:12px; font-size:14px;" onclick="openModal('preset', ${p.id})">+ Добавить</button>
-                    <button class="btn btn-green" style="padding:12px; font-size:14px; box-shadow:none;" onclick="usePreset(${p.id})">Интегрировать</button>
-                    <button class="btn btn-red" style="padding:12px; width:60px;" onclick="state.presets.splice(${i},1); save(); renderPresets()">✕</button>
-                </div></div>`;
-                c.innerHTML += h;
+        let chartInst = null;
+        function renderChart(labels) {
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            if(chartInst) chartInst.destroy();
+            chartInst = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [{ data: labels.map(l => state.weightLogs[l]), borderColor: '#00f2ff', tension: 0.4, borderShadowBlur: 10 }] },
+                options: { plugins: { legend: {display: false} }, scales: { y: { display: false }, x: { ticks: {color: 'rgba(255,255,255,0.3)'} } } }
             });
         }
-        function usePreset(id) {
-            const p = state.presets.find(x => x.id === id);
-            if(!state.workouts[state.date]) state.workouts[state.date] = [];
-            state.workouts[state.date].push(...JSON.parse(JSON.stringify(p.ex)));
-            save(); nav('plan');
+
+        // --- RANDOMIZER ---
+        function updateRndList() {
+            const m = document.getElementById('rnd-muscle').value;
+            document.getElementById('rnd-config-list').innerHTML = (state.rndData[m] || []).map((ex, i) => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:14px">
+                    <span>${ex}</span><span style="color:#ff3366" onclick="state.rndData['${m}'].splice(${i},1); save();">✕</span>
+                </div>`).join('');
+        }
+        function addRndEx() {
+            const m = document.getElementById('rnd-muscle').value;
+            const n = document.getElementById('rnd-new-name').value;
+            if(n) { state.rndData[m].push(n); document.getElementById('rnd-new-name').value = ''; save(); }
+        }
+        function spinRnd() {
+            const m = document.getElementById('rnd-muscle').value;
+            const items = state.rndData[m];
+            if(!items?.length) return;
+            tg.HapticFeedback.impactOccurred('medium');
+            let i = 0;
+            let timer = setInterval(() => {
+                document.getElementById('rnd-result').innerText = items[Math.floor(Math.random()*items.length)];
+                if(i++ > 10) clearInterval(timer);
+            }, 50);
         }
 
-        // --- МОДАЛКА УПРАЖНЕНИЙ ---
-        function openModal(type, id = null) {
-            modalCtx = { type, id }; tempSets = [{w: 0, r: 0}]; 
-            document.getElementById('m-name').value = ''; renderModSets();
+        // --- MODALS ---
+        function openModal(type) {
+            const cont = document.getElementById('modal-content');
+            if(type === 'workout') {
+                cont.innerHTML = `<h1>Упражнение</h1>
+                    <select id="m-m" class="input-box">${MUSCLES.map(m => `<option>${m}</option>`).join('')}</select>
+                    <input type="text" id="m-n" class="input-box" placeholder="Название" style="margin:10px 0">
+                    <div id="m-sets"></div>
+                    <button class="btn" style="width:100%" onclick="addMSet()">+ Подход</button>
+                    <button class="btn btn-accent" style="width:100%; margin-top:15px" onclick="saveEx()">Добавить</button>
+                    <button class="btn" style="width:100%; margin-top:10px" onclick="closeModal()">Отмена</button>`;
+            } else if(type === 'pb') {
+                cont.innerHTML = `<h1>Новый рекорд</h1>
+                    <input type="text" id="pb-n" class="input-box" placeholder="Упражнение">
+                    <input type="number" id="pb-w" class="input-box" placeholder="Вес (кг)" style="margin:10px 0">
+                    <button class="btn btn-accent" style="width:100%" onclick="savePB()">Записать в историю</button>
+                    <button class="btn" style="width:100%; margin-top:10px" onclick="closeModal()">Закрыть</button>`;
+            }
             document.getElementById('modal').style.display = 'block';
         }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function addModalSet() { tempSets.push({w: 0, r: 0}); renderModSets(); }
-        function renderModSets() {
-            document.getElementById('m-sets').innerHTML = tempSets.map((s, i) => `
-                <div style="display:flex; gap:15px; margin-bottom:15px;">
-                    <input type="number" class="input-box" style="margin:0" value="${s.w||''}" onchange="tempSets[${i}].w=this.value" placeholder="Масса (кг)">
-                    <input type="number" class="input-box" style="margin:0" value="${s.r||''}" onchange="tempSets[${i}].r=this.value" placeholder="Повторения">
-                </div>
-            `).join('');
-        }
+        function addMSet() { document.getElementById('m-sets').innerHTML += `<div style="display:flex; gap:5px; margin-bottom:5px"><input type="number" class="input-box sw" placeholder="кг"><input type="number" class="input-box sr" placeholder="раз"></div>`; }
         function saveEx() {
-            const m = document.getElementById('m-muscle').value;
-            const n = document.getElementById('m-name').value;
-            if(!n) return;
-            const ex = { muscle: m, name: n, sets: tempSets.map(s => ({...s, done: false})) };
-            if(modalCtx.type === 'plan') {
-                if(!state.workouts[state.date]) state.workouts[state.date] = [];
-                state.workouts[state.date].push(ex);
-            } else {
-                state.presets.find(p => p.id === modalCtx.id).ex.push(ex);
-            }
-            save(); closeModal(); renderUI();
+            const muscle = document.getElementById('m-m').value;
+            const name = document.getElementById('m-n').value;
+            const sets = Array.from(document.querySelectorAll('#m-sets > div')).map(d => ({ w: d.querySelector('.sw').value, r: d.querySelector('.sr').value }));
+            if(!state.workouts[state.viewDate]) state.workouts[state.viewDate] = [];
+            state.workouts[state.viewDate].push({ muscle, name, sets });
+            save(); closeModal();
+        }
+        function savePB() {
+            const name = document.getElementById('pb-n').value;
+            const weight = document.getElementById('pb-w').value;
+            if(name && weight) { state.pbVault.push({ name, weight, date: new Date().toLocaleDateString() }); save(); closeModal(); }
         }
 
-        // --- УТИЛИТЫ ---
-        function calcRM() {
-            const w = parseFloat(document.getElementById('orm-w').value);
-            const r = parseFloat(document.getElementById('orm-r').value);
-            const res = document.getElementById('rm-res');
-            if(w && r) { res.innerText = `${Math.round(w * (1 + r/30))} kg`; res.style.display = 'block'; }
+        // --- CORE UI ---
+        function nav(p, el) {
+            document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
         }
-
-        function addWeight() {
-            const v = parseFloat(document.getElementById('stat-w').value);
-            if(v) { state.weights.push({ d: new Date().toLocaleDateString(), v }); save(); renderStats(); }
-        }
-        function renderStats() {
-            const h = document.getElementById('weight-history'); h.innerHTML = '';
-            state.weights.slice(-5).reverse().forEach(w => h.innerHTML += `<div class="set-row"><span class="text-dim" style="font-family:monospace;">${w.d}</span><b style="color:var(--text-main); font-size:20px;">${w.v} kg</b></div>`);
-            
-            if(chartInst) chartInst.destroy();
-            Chart.defaults.color = '#8b8b93';
-            Chart.defaults.font.family = 'monospace';
-            chartInst = new Chart(document.getElementById('chartCanvas'), {
-                type: 'line',
-                data: { labels: state.weights.map(x => x.d), datasets: [{ label: 'Масса', data: state.weights.map(x => x.v), borderColor: '#00ff66', backgroundColor: 'rgba(0, 255, 102, 0.1)', fill: true, tension: 0.4, borderWidth: 3 }] },
-                options: { plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1f1f22' } }, y: { grid: { color: '#1f1f22' } } } }
-            });
-        }
-
-        // --- ЛАБОРАТОРИЯ ВОССТАНОВЛЕНИЯ (Колесо) ---
-        function drawWheel() {
-            const m = document.getElementById('wheel-m').value;
-            const items = state.wheelData[m] || [];
-            const ctx = document.getElementById('wheelCanvas').getContext('2d');
-            const r = 140; ctx.clearRect(0,0,280,280);
-            
-            if(!items.length) return;
-            const arc = (Math.PI * 2) / items.length;
-            items.forEach((text, i) => {
-                ctx.beginPath(); ctx.fillStyle = i % 2 === 0 ? '#00ff66' : '#00cc52';
-                ctx.moveTo(r, r); ctx.arc(r, r, r, i*arc, (i+1)*arc); ctx.fill();
-                ctx.save(); ctx.translate(r, r); ctx.rotate(i*arc + arc/2);
-                ctx.fillStyle = '#000'; ctx.font = '800 14px sans-serif';
-                ctx.fillText(text.slice(0, 15).toUpperCase(), 60, 5); ctx.restore();
-            });
-        }
-        function spinWheel() {
-            wheelRot += 1800 + Math.random() * 360;
-            document.getElementById('wheelCanvas').style.transform = `rotate(${wheelRot}deg)`;
-            tg.HapticFeedback.impactOccurred('rigid');
-        }
-
-        function renderUI() {
-            renderCal(); renderPlan(); renderPresets(); renderStats(); drawWheel(); updateBioRings();
+        function renderAll() {
+            renderRecovery(); renderTrain(); renderBody(); updateRndList();
+            document.getElementById('pb-list').innerHTML = state.pbVault.slice(-3).reverse().map(p => `
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+                    <span>${p.name}</span><span class="record-badge">${p.weight} KG</span>
+                </div>`).join('');
         }
     </script>
 </body>
